@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:searcher_app/searcher_bar.dart';
 import 'package:system_tray/system_tray.dart';
 
