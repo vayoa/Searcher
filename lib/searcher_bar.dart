@@ -213,7 +213,8 @@ class _SearcherBarState extends State<SearcherBar> {
                                 final hasDescription =
                                     descriptionsList[index].isNotEmpty;
                                 final suggestion = suggestionsList[index];
-                                final boldedIndex = suggestion.indexOf(bolded);
+                                final boldedIndex =
+                                    suggestion.indexOf(bolded);
                                 RichText title;
                                 if (boldedIndex == -1) {
                                   title = RichText(
@@ -247,13 +248,14 @@ class _SearcherBarState extends State<SearcherBar> {
                                   title = RichText(
                                     text: TextSpan(
                                         text: left,
-                                        style:
-                                            TextStyle(color: Colors.grey[300]),
+                                        style: TextStyle(
+                                            color: Colors.grey[300]),
                                         children: [
                                           TextSpan(
                                               text: bolded,
                                               style: const TextStyle(
-                                                  fontWeight: FontWeight.bold)),
+                                                  fontWeight:
+                                                      FontWeight.bold)),
                                           TextSpan(
                                               text: right,
                                               style: const TextStyle(
@@ -293,8 +295,8 @@ class _SearcherBarState extends State<SearcherBar> {
                                       dense: hasDescription,
                                       minVerticalPadding: 0.0,
                                       hoverColor: Colors.black12,
-                                      contentPadding:
-                                          EdgeInsets.symmetric(horizontal: 4.0),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 4.0),
                                       onTap: () => search(suggestion),
                                     ),
                                     decoration: BoxDecoration(
