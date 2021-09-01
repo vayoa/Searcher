@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:process_run/shell.dart';
 import 'package:searcher_app/searcher_buttons.dart';
 import 'package:http/http.dart' as http;
+import 'package:string_similarity/string_similarity.dart';
 import 'group_chip.dart';
 
 enum SearcherMode {
@@ -34,14 +35,6 @@ class _SearcherBarState extends State<SearcherBar> {
   void dispose() {
     _searchBarFocusNode.dispose();
     super.dispose();
-  }
-
-  updateMode(SearcherMode newMode) {
-    if (mode != newMode) {
-      setState(() {
-        mode = newMode;
-      });
-    }
   }
 
   @override
@@ -108,10 +101,6 @@ class _SearcherBarState extends State<SearcherBar> {
                                               case 'incognito':
                                                 setState(() {
                                                   incognito = !incognito;
-                                                  _textEditingController
-                                                      .clear();
-                                                  _searchBarFocusNode
-                                                      .requestFocus();
                                                 });
                                                 break;
                                             }
@@ -119,11 +108,14 @@ class _SearcherBarState extends State<SearcherBar> {
                                             newMode = SearcherMode.terminal;
                                             final command =
                                                 trim.substring(2).trim();
+                                            await runCommand(command);
                                           } else {
                                             newMode = SearcherMode.search;
                                             await search(query);
                                           }
                                           suggestions.value = const {};
+                                          _textEditingController.clear();
+                                          _searchBarFocusNode.requestFocus();
                                           updateMode(newMode);
                                         },
                                         onChanged: (newQuery) async {
@@ -135,8 +127,14 @@ class _SearcherBarState extends State<SearcherBar> {
                                                 newSuggestions = {};
                                             for (String searcherCommand
                                                 in searcherCommands.keys) {
+                                              final double matchPercentage =
+                                                  StringSimilarity
+                                                      .compareTwoStrings(
+                                                          searcherCommand,
+                                                          command);
                                               if (searcherCommand
-                                                  .contains(command))
+                                                      .contains(command) ||
+                                                  matchPercentage >= 0.5)
                                                 newSuggestions[
                                                         searcherCommand] =
                                                     searcherCommands[
@@ -213,8 +211,7 @@ class _SearcherBarState extends State<SearcherBar> {
                                 final hasDescription =
                                     descriptionsList[index].isNotEmpty;
                                 final suggestion = suggestionsList[index];
-                                final boldedIndex =
-                                    suggestion.indexOf(bolded);
+                                final boldedIndex = suggestion.indexOf(bolded);
                                 RichText title;
                                 if (boldedIndex == -1) {
                                   title = RichText(
@@ -248,14 +245,13 @@ class _SearcherBarState extends State<SearcherBar> {
                                   title = RichText(
                                     text: TextSpan(
                                         text: left,
-                                        style: TextStyle(
-                                            color: Colors.grey[300]),
+                                        style:
+                                            TextStyle(color: Colors.grey[300]),
                                         children: [
                                           TextSpan(
                                               text: bolded,
                                               style: const TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.bold)),
+                                                  fontWeight: FontWeight.bold)),
                                           TextSpan(
                                               text: right,
                                               style: const TextStyle(
@@ -295,8 +291,8 @@ class _SearcherBarState extends State<SearcherBar> {
                                       dense: hasDescription,
                                       minVerticalPadding: 0.0,
                                       hoverColor: Colors.black12,
-                                      contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 4.0),
+                                      contentPadding:
+                                          EdgeInsets.symmetric(horizontal: 4.0),
                                       onTap: () => search(suggestion),
                                     ),
                                     decoration: BoxDecoration(
@@ -320,6 +316,19 @@ class _SearcherBarState extends State<SearcherBar> {
         ),
       ],
     );
+  }
+
+  updateMode(SearcherMode newMode) {
+    if (mode != newMode) {
+      setState(() {
+        mode = newMode;
+      });
+    }
+  }
+
+  Future<void> runCommand(String command) async {
+    var shell = Shell();
+    await shell.run(command);
   }
 
   Future<void> search(String query, {List<String> websites = const []}) async {

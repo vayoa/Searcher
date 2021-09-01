@@ -37,6 +37,7 @@ dependencies:
   flutter_typeahead: ^3.2.0
   http: ^0.13.3
   provider: ^6.0.0
+  string_similarity: ^2.0.0
 
 dev_dependencies:
   flutter_test:
