@@ -58,16 +58,21 @@ class _MyAppState extends State<MyApp> {
                 Align(
                   alignment: Alignment.topLeft,
                   child: Container(
-                    height: 10.0,
+                    height: 20.0,
+                    // TODO: Make this color a settings.
+                    color: Colors.black45,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: MoveWindow(),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4.0, right: 4.0),
-                          child: WindowButtons(),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 6.0),
+                            child: WindowButtons(),
+                          ),
                         ),
                       ],
                     ),

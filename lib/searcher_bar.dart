@@ -50,7 +50,7 @@ class _SearcherBarState extends State<SearcherBar> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0),
+          padding: const EdgeInsets.only(top: 26.0, left: 8.0, right: 8.0),
           child: Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 850, minWidth: 700),
@@ -193,7 +193,7 @@ class _SearcherBarState extends State<SearcherBar> {
                   LayoutBuilder(builder: (context, constraints) {
                     final double maxHeight = MediaQuery.of(context).size.height;
                     return ConstrainedBox(
-                      constraints: BoxConstraints(maxHeight: maxHeight - 84),
+                      constraints: BoxConstraints(maxHeight: maxHeight - 94),
                       child: ValueListenableBuilder<Map<String, String>>(
                         valueListenable: suggestions,
                         builder: (context, suggestionsMap, child) {
@@ -314,7 +314,7 @@ class _SearcherBarState extends State<SearcherBar> {
   }
 
   Future<void> search(String query,
-      {List<String> websites = const [], bool incognito = true}) async {
+      {List<String> websites = const []}) async {
     var shell = Shell();
     String process = 'start chrome ';
     if (incognito) {
