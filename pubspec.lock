@@ -57,6 +57,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.0"
+  bloc:
+    dependency: transitive
+    description:
+      name: bloc
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "7.1.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -99,6 +106,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.3"
+  equatable:
+    dependency: "direct main"
+    description:
+      name: equatable
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.3"
   fake_async:
     dependency: transitive
     description:
@@ -125,6 +139,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.0.2"
+  flutter_bloc:
+    dependency: "direct main"
+    description:
+      name: flutter_bloc
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "7.2.0"
   flutter_keyboard_visibility:
     dependency: transitive
     description:

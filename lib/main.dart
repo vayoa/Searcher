@@ -4,7 +4,7 @@ import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:path/path.dart' as p;
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
-import 'package:searcher_app/searcher_bar.dart';
+import 'package:searcher_app/Widgets/Searcher%20Bar/searcher_bar.dart';
 import 'package:system_tray/system_tray.dart';
 
 void main() {
@@ -54,7 +54,10 @@ class _MyAppState extends State<MyApp> {
             backgroundColor: Colors.transparent,
             body: Stack(
               children: [
-                SearcherBar(),
+                Padding(
+                  padding: const EdgeInsets.only(top: 26.0),
+                  child: SearcherBar(),
+                ),
                 Align(
                   alignment: Alignment.topLeft,
                   child: Container(

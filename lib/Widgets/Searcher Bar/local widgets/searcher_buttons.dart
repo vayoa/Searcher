@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:searcher_app/searcher_bar.dart';
+import 'package:searcher_app/Widgets/Searcher%20Bar/searcher_bar.dart';
 
 class SearcherButtons extends StatelessWidget {
   const SearcherButtons({
