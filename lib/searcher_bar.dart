@@ -100,7 +100,8 @@ class _SearcherBarState extends State<SearcherBar> {
                                           SearcherMode newMode;
                                           final trim = query.trim();
                                           if (trim.startsWith('!>')) {
-                                            newMode = SearcherMode.searcherCommand;
+                                            newMode =
+                                                SearcherMode.searcherCommand;
                                             final command =
                                                 trim.substring(2).trim();
                                             switch (command) {
@@ -143,7 +144,8 @@ class _SearcherBarState extends State<SearcherBar> {
                                             }
                                             formattedQuery = command;
                                             suggestions.value = newSuggestions;
-                                            updateMode(SearcherMode.searcherCommand);
+                                            updateMode(
+                                                SearcherMode.searcherCommand);
                                           } else if (trim.startsWith('>>')) {
                                             final command =
                                                 trim.substring(2).trim();
@@ -217,17 +219,17 @@ class _SearcherBarState extends State<SearcherBar> {
                                   title = RichText(
                                       text: TextSpan(
                                           text: suggestion,
-                                          style: const TextStyle(
-                                              color: Colors.black)));
+                                          style: TextStyle(
+                                              color: Colors.grey[300])));
                                 } else if (boldedIndex == 0) {
                                   final remainder =
                                       suggestion.substring(bolded.length);
                                   title = RichText(
                                     text: TextSpan(
                                         text: bolded,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.black),
+                                            color: Colors.grey[300]),
                                         children: [
                                           TextSpan(
                                               text: remainder,
@@ -245,8 +247,8 @@ class _SearcherBarState extends State<SearcherBar> {
                                   title = RichText(
                                     text: TextSpan(
                                         text: left,
-                                        style: const TextStyle(
-                                            color: Colors.black),
+                                        style:
+                                            TextStyle(color: Colors.grey[300]),
                                         children: [
                                           TextSpan(
                                               text: bolded,
@@ -265,8 +267,8 @@ class _SearcherBarState extends State<SearcherBar> {
                                   title = RichText(
                                       text: TextSpan(
                                           text: remainder,
-                                          style: const TextStyle(
-                                              color: Colors.black),
+                                          style: TextStyle(
+                                              color: Colors.grey[300]),
                                           children: [
                                         TextSpan(
                                             text: bolded,
@@ -286,6 +288,7 @@ class _SearcherBarState extends State<SearcherBar> {
                                       visualDensity: VisualDensity.compact,
                                       dense: hasDescription,
                                       minVerticalPadding: 0.0,
+                                      hoverColor: Colors.black12,
                                       contentPadding:
                                           EdgeInsets.symmetric(horizontal: 4.0),
                                       onTap: () => search(suggestion),
@@ -313,8 +316,7 @@ class _SearcherBarState extends State<SearcherBar> {
     );
   }
 
-  Future<void> search(String query,
-      {List<String> websites = const []}) async {
+  Future<void> search(String query, {List<String> websites = const []}) async {
     var shell = Shell();
     String process = 'start chrome ';
     if (incognito) {

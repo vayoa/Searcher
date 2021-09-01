@@ -90,7 +90,7 @@ class _MyAppState extends State<MyApp> {
 class WindowButtons extends StatelessWidget {
   const WindowButtons({
     Key? key,
-    this.width = 20.0,
+    this.width = 25.0,
   }) : super(key: key);
 
   final double width;
