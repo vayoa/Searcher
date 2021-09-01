@@ -283,7 +283,11 @@ class _SearcherBarState extends State<SearcherBar> {
                                     child: ListTile(
                                       title: title,
                                       subtitle: hasDescription
-                                          ? Text(descriptionsList[index])
+                                          ? Text(
+                                              descriptionsList[index],
+                                              style: TextStyle(
+                                                  color: Colors.grey[500]),
+                                            )
                                           : null,
                                       visualDensity: VisualDensity.compact,
                                       dense: hasDescription,
