@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:searcher_app/searcher_bar.dart';
 
 class SearcherButtons extends StatelessWidget {
-  const SearcherButtons({Key? key}) : super(key: key);
+  const SearcherButtons({
+    Key? key,
+    required this.initialSearcherMode,
+  }) : super(key: key);
+
+  final SearcherMode initialSearcherMode;
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +23,10 @@ class SearcherButtons extends StatelessWidget {
           indent: 4.0,
           endIndent: 4.0,
         ),
-        SearcherButton(
-          icon: Icons.search,
+        MainSearcherButton(
+          initialSearcherMode: initialSearcherMode,
           onPressed: () {},
-        )
+        ),
       ],
     );
   }
@@ -46,6 +52,51 @@ class SearcherButton extends StatelessWidget {
         ),
         onPressed: this.onPressed,
       ),
+    );
+  }
+}
+
+class MainSearcherButton extends StatefulWidget {
+  const MainSearcherButton({
+    Key? key,
+    required this.initialSearcherMode,
+    required this.onPressed,
+  }) : super(key: key);
+
+  final SearcherMode initialSearcherMode;
+  final void Function() onPressed;
+
+  @override
+  _MainSearcherButtonState createState() => _MainSearcherButtonState();
+}
+
+class _MainSearcherButtonState extends State<MainSearcherButton> {
+  late SearcherMode _searcherMode;
+
+  @override
+  void initState() {
+    _searcherMode = widget.initialSearcherMode;
+    super.initState();
+  }
+
+  IconData _getButtonIcon() {
+    switch (_searcherMode) {
+      case SearcherMode.search:
+        return Icons.search;
+      case SearcherMode.searcherCommand:
+        return Icons.adjust_outlined;
+      case SearcherMode.terminal:
+        return Icons.double_arrow_outlined;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    /* TODO: Switch the icon based on the current searcher mode with a
+        slide-fade animation. */
+    return SearcherButton(
+      icon: _getButtonIcon(),
+      onPressed: widget.onPressed,
     );
   }
 }
