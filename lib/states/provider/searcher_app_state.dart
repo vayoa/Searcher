@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:process_run/shell.dart';
-import 'package:searcher_app/States/Blocs/Searcher%20Bloc/searcher_bloc.dart';
+import 'package:searcher_app/states/blocs/searcher_bloc/searcher_bloc.dart';
 
 class SearcherAppState extends ChangeNotifier {
   bool incognito = true;

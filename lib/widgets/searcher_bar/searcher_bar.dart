@@ -1,15 +1,15 @@
 import 'dart:math';
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:searcher_app/States/Blocs/Searcher%20Bloc/searcher_bloc.dart';
-import 'package:searcher_app/States/Provider/searcher_app_state.dart';
-import 'package:searcher_app/Widgets/Searcher%20Bar/local%20widgets/searcher_buttons.dart';
-import 'local widgets/animated_waves.dart';
-import 'local widgets/group_chip.dart';
+import 'package:searcher_app/states/blocs/searcher_bloc/searcher_bloc.dart';
+import 'package:searcher_app/states/provider/searcher_app_state.dart';
+import 'package:searcher_app/widgets/searcher_bar/local_widgets/animated_waves.dart';
+import 'package:searcher_app/widgets/searcher_bar/local_widgets/searcher_buttons.dart';
+
+import 'local_widgets/group_chip.dart';
 
 class SearcherBar extends StatefulWidget {
   const SearcherBar({
@@ -69,7 +69,7 @@ class _SearcherBarState extends State<SearcherBar> {
                           children: [
                             Align(
                               alignment: Alignment.bottomCenter,
-                              child: AnimatedWaves(),
+                              child: AnimatedWaves(incognito: state.incognito),
                             ),
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 500),

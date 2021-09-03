@@ -1,12 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:searcher_app/States/Provider/searcher_app_state.dart';
-import 'package:searcher_app/Widgets/Searcher%20Bar/searcher_bar.dart';
-import 'Widgets/Searcher Bar/local widgets/animated_waves.dart';
+import 'package:searcher_app/states/provider/searcher_app_state.dart';
+import 'package:searcher_app/widgets/searcher_bar/searcher_bar.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

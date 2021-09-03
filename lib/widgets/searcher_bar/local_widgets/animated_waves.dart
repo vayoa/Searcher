@@ -1,15 +1,16 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:searcher_app/States/Blocs/Searcher%20Bloc/searcher_bloc.dart';
-import 'package:searcher_app/States/Provider/searcher_app_state.dart';
+import 'package:searcher_app/states/blocs/searcher_bloc/searcher_bloc.dart';
+import 'package:searcher_app/states/provider/searcher_app_state.dart';
 import 'package:wave/config.dart';
 import 'package:wave/wave.dart';
 
 class AnimatedWaves extends StatefulWidget {
-  const AnimatedWaves({Key? key}) : super(key: key);
+  const AnimatedWaves({Key? key, required this.incognito}) : super(key: key);
+
+  final bool incognito;
 
   @override
   _AnimatedWavesState createState() => _AnimatedWavesState();
@@ -37,14 +38,22 @@ class _AnimatedWavesState extends State<AnimatedWaves>
           _animationController.reverse();
         }
       },
-      child: AnimateWaves(animation: _animationController),
+      child: AnimateWaves(
+        animation: _animationController,
+        incognito: widget.incognito,
+      ),
     );
   }
 }
 
 class AnimateWaves extends AnimatedWidget {
-  AnimateWaves({Key? key, required Animation<double> animation})
-      : super(key: key, listenable: animation);
+  AnimateWaves({
+    Key? key,
+    required Animation<double> animation,
+    required this.incognito,
+  }) : super(key: key, listenable: animation);
+
+  final bool incognito;
 
   @override
   Widget build(BuildContext context) {
@@ -56,12 +65,20 @@ class AnimateWaves extends AnimatedWidget {
         durations: const [35000, 19440, 10800, 6000],
         heightPercentages: const [0.20, 0.23, 0.25, 0.30],
         blur: const MaskFilter.blur(BlurStyle.solid, 3),
-        colors: [
-          Colors.grey[700]!,
-          Colors.grey[600]!,
-          Colors.grey[500]!,
-          Colors.grey[400]!,
-        ],
+        colors: incognito
+            // TODO: Make a better color palette for incognito mode.
+            ? [
+                Colors.grey[900]!,
+                Colors.grey[800]!,
+                Colors.grey[700]!,
+                Colors.grey[600]!,
+              ]
+            : [
+                Colors.grey[700]!,
+                Colors.grey[600]!,
+                Colors.grey[500]!,
+                Colors.grey[400]!,
+              ],
       ),
       waveAmplitude: 0,
       size: Size(double.infinity,
