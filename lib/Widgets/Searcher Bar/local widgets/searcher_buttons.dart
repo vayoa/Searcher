@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:searcher_app/States/Blocs/Searcher%20Bloc/searcher_bloc.dart';
 import 'package:searcher_app/States/Provider/searcher_app_state.dart';
 
 class SearcherButtons extends StatelessWidget {
@@ -110,17 +108,14 @@ class _MainSearcherButtonState extends State<MainSearcherButton>
     final CurvedAnimation curvedAnimation =
         CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
     return ClipRect(
-      child: BlocListener<SearcherBloc, SearcherState>(
-        bloc: Provider.of<SearcherAppState>(context).searcherBloc,
-        listener: (context, state) {
-          if (state is SearcherSuggestionsLoading) {
+      child: Selector<SearcherAppState, SearcherMode>(
+          selector: (_, state) => state.currentSearcherMode,
+          builder: (context, switchedMode, _) {
             SearcherMode switchedMode =
                 Provider.of<SearcherAppState>(context, listen: false)
                     .currentSearcherMode;
             if (_currentMode != switchedMode) {
-              setState(() {
-                _newMode = switchedMode;
-              });
+              _newMode = switchedMode;
               _animationController.forward().then((value) {
                 _animationController.value = 0.0;
                 setState(() {
@@ -128,43 +123,43 @@ class _MainSearcherButtonState extends State<MainSearcherButton>
                 });
               });
             }
-          }
-        },
-        child: Stack(
-          children: [
-            FadeTransition(
-              opacity: Tween<double>(begin: 1.0, end: 0.0).animate(
-                  CurvedAnimation(
-                      parent: _animationController, curve: Interval(0.0, 0.3))),
-              child: SlideTransition(
-                position:
-                    Tween<Offset>(begin: Offset.zero, end: Offset(1.0, 0.0))
-                        .animate(curvedAnimation),
-                child: SearcherButton(
-                  icon: _getButtonIcon(_currentMode),
-                  onPressed: widget.onPressed,
-                ),
-              ),
-            ),
-            FadeTransition(
-              opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-                  CurvedAnimation(
-                      parent: _animationController, curve: Interval(0.3, 1.0))),
-              child: SlideTransition(
-                position:
-                    Tween<Offset>(begin: Offset(-1.0, 0.0), end: Offset.zero)
-                        .animate(curvedAnimation),
-                child: IgnorePointer(
-                  child: SearcherButton(
-                    icon: _getButtonIcon(_newMode),
-                    onPressed: widget.onPressed,
+            return Stack(
+              children: [
+                FadeTransition(
+                  opacity: Tween<double>(begin: 1.0, end: 0.0).animate(
+                      CurvedAnimation(
+                          parent: _animationController,
+                          curve: Interval(0.0, 0.3))),
+                  child: SlideTransition(
+                    position:
+                        Tween<Offset>(begin: Offset.zero, end: Offset(1.0, 0.0))
+                            .animate(curvedAnimation),
+                    child: SearcherButton(
+                      icon: _getButtonIcon(_currentMode),
+                      onPressed: widget.onPressed,
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
+                FadeTransition(
+                  opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+                      CurvedAnimation(
+                          parent: _animationController,
+                          curve: Interval(0.3, 1.0))),
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                            begin: Offset(-1.0, 0.0), end: Offset.zero)
+                        .animate(curvedAnimation),
+                    child: IgnorePointer(
+                      child: SearcherButton(
+                        icon: _getButtonIcon(_newMode),
+                        onPressed: widget.onPressed,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
     );
   }
 }

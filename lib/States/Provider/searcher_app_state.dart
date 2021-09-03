@@ -47,6 +47,10 @@ class SearcherAppState extends ChangeNotifier {
         break;
     }
     await runInMode(newMode, command);
+    /* TODO: This is done so we won't confuse the user since we go back to
+        search mode after a run. If this behaviour is ever changed make sure to
+        change this here as well. */
+    currentSearcherMode = SearcherMode.search;
     searcherBloc.add(ClearSuggestions());
   }
 
