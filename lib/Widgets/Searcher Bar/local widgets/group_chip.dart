@@ -12,7 +12,7 @@ class GroupChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChoiceChip(
       visualDensity: VisualDensity.compact,
-      label: Container(width: 10),
+      label: Container(width: 8),
       selected: this.selected,
     );
   }

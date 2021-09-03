@@ -10,23 +10,26 @@ class SearcherInitial extends SearcherState {
 }
 
 class SearcherSuggestionsLoading extends SearcherState {
-  final SearcherMode searcherMode;
 
-  const SearcherSuggestionsLoading(this.searcherMode);
+  const SearcherSuggestionsLoading();
 
   @override
-  List<Object?> get props => [this.searcherMode];
+  List<Object?> get props => [];
 }
 
 class SearcherSuggestionsDone extends SearcherState {
-  final SearcherMode searcherMode;
   final String formattedText;
   final Map<String, String> suggestions;
 
-  const SearcherSuggestionsDone(
-      this.searcherMode, this.formattedText, this.suggestions);
+  const SearcherSuggestionsDone(this.formattedText, this.suggestions);
 
   @override
-  List<Object?> get props =>
-      [this.searcherMode, this.suggestions, this.suggestions];
+  List<Object?> get props => [this.suggestions, this.suggestions];
+}
+
+class SearcherSuggestionsClear extends SearcherState {
+  const SearcherSuggestionsClear();
+
+  @override
+  List<Object?> get props => [];
 }

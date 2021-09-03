@@ -184,6 +184,20 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  glass_kit:
+    dependency: "direct main"
+    description:
+      name: glass_kit
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
+  glassmorphism_ui:
+    dependency: "direct main"
+    description:
+      name: glassmorphism_ui
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.0"
   http:
     dependency: "direct main"
     description:
@@ -392,6 +406,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
+  wave:
+    dependency: "direct main"
+    description:
+      name: wave
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.0"
   win32:
     dependency: transitive
     description:

@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:searcher_app/Widgets/Searcher%20Bar/searcher_bar.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:searcher_app/States/Blocs/Searcher%20Bloc/searcher_bloc.dart';
+import 'package:searcher_app/States/Provider/searcher_app_state.dart';
 
 class SearcherButtons extends StatelessWidget {
   const SearcherButtons({
     Key? key,
     required this.initialSearcherMode,
+    required this.clear,
+    required this.submit,
   }) : super(key: key);
 
   final SearcherMode initialSearcherMode;
+  final void Function() clear;
+  final void Function() submit;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +23,7 @@ class SearcherButtons extends StatelessWidget {
       children: [
         SearcherButton(
           icon: Icons.close,
-          onPressed: () {},
+          onPressed: this.clear,
         ),
         VerticalDivider(
           thickness: 1.5,
@@ -24,8 +31,7 @@ class SearcherButtons extends StatelessWidget {
           endIndent: 4.0,
         ),
         MainSearcherButton(
-          initialSearcherMode: initialSearcherMode,
-          onPressed: () {},
+          onPressed: this.submit,
         ),
       ],
     );
@@ -43,14 +49,18 @@ class SearcherButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: IconButton(
-        iconSize: 20.0,
-        splashRadius: 20.0,
-        icon: Icon(
-          this.icon,
+    return Focus(
+      skipTraversal: true,
+      canRequestFocus: false,
+      child: Center(
+        child: IconButton(
+          iconSize: 20.0,
+          splashRadius: 20.0,
+          icon: Icon(
+            this.icon,
+          ),
+          onPressed: this.onPressed,
         ),
-        onPressed: this.onPressed,
       ),
     );
   }
@@ -59,28 +69,23 @@ class SearcherButton extends StatelessWidget {
 class MainSearcherButton extends StatefulWidget {
   const MainSearcherButton({
     Key? key,
-    required this.initialSearcherMode,
     required this.onPressed,
   }) : super(key: key);
 
-  final SearcherMode initialSearcherMode;
   final void Function() onPressed;
 
   @override
   _MainSearcherButtonState createState() => _MainSearcherButtonState();
 }
 
-class _MainSearcherButtonState extends State<MainSearcherButton> {
-  late SearcherMode _searcherMode;
+class _MainSearcherButtonState extends State<MainSearcherButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animationController;
+  late SearcherMode _currentMode;
+  late SearcherMode _newMode;
 
-  @override
-  void initState() {
-    _searcherMode = widget.initialSearcherMode;
-    super.initState();
-  }
-
-  IconData _getButtonIcon() {
-    switch (_searcherMode) {
+  IconData _getButtonIcon(SearcherMode mode) {
+    switch (mode) {
       case SearcherMode.search:
         return Icons.search;
       case SearcherMode.searcherCommand:
@@ -91,12 +96,75 @@ class _MainSearcherButtonState extends State<MainSearcherButton> {
   }
 
   @override
+  void initState() {
+    _animationController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 800));
+    this._currentMode = Provider.of<SearcherAppState>(context, listen: false)
+        .currentSearcherMode;
+    _newMode = _currentMode;
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    /* TODO: Switch the icon based on the current searcher mode with a
-        slide-fade animation. */
-    return SearcherButton(
-      icon: _getButtonIcon(),
-      onPressed: widget.onPressed,
+    final CurvedAnimation curvedAnimation =
+        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
+    return ClipRect(
+      child: BlocListener<SearcherBloc, SearcherState>(
+        bloc: Provider.of<SearcherAppState>(context).searcherBloc,
+        listener: (context, state) {
+          if (state is SearcherSuggestionsLoading) {
+            SearcherMode switchedMode =
+                Provider.of<SearcherAppState>(context, listen: false)
+                    .currentSearcherMode;
+            if (_currentMode != switchedMode) {
+              setState(() {
+                _newMode = switchedMode;
+              });
+              _animationController.forward().then((value) {
+                _animationController.value = 0.0;
+                setState(() {
+                  _currentMode = _newMode;
+                });
+              });
+            }
+          }
+        },
+        child: Stack(
+          children: [
+            FadeTransition(
+              opacity: Tween<double>(begin: 1.0, end: 0.0).animate(
+                  CurvedAnimation(
+                      parent: _animationController, curve: Interval(0.0, 0.3))),
+              child: SlideTransition(
+                position:
+                    Tween<Offset>(begin: Offset.zero, end: Offset(1.0, 0.0))
+                        .animate(curvedAnimation),
+                child: SearcherButton(
+                  icon: _getButtonIcon(_currentMode),
+                  onPressed: widget.onPressed,
+                ),
+              ),
+            ),
+            FadeTransition(
+              opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+                  CurvedAnimation(
+                      parent: _animationController, curve: Interval(0.3, 1.0))),
+              child: SlideTransition(
+                position:
+                    Tween<Offset>(begin: Offset(-1.0, 0.0), end: Offset.zero)
+                        .animate(curvedAnimation),
+                child: IgnorePointer(
+                  child: SearcherButton(
+                    icon: _getButtonIcon(_newMode),
+                    onPressed: widget.onPressed,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

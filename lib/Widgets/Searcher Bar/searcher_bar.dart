@@ -1,19 +1,15 @@
-import 'dart:convert';
+import 'dart:math';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:process_run/shell.dart';
-import 'package:searcher_app/Blocs/Searcher%20Bloc/searcher_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:searcher_app/States/Blocs/Searcher%20Bloc/searcher_bloc.dart';
+import 'package:searcher_app/States/Provider/searcher_app_state.dart';
 import 'package:searcher_app/Widgets/Searcher%20Bar/local%20widgets/searcher_buttons.dart';
-import 'package:http/http.dart' as http;
-import 'package:string_similarity/string_similarity.dart';
+import 'local widgets/animated_waves.dart';
 import 'local widgets/group_chip.dart';
-
-enum SearcherMode {
-  search,
-  searcherCommand,
-  terminal,
-}
 
 class SearcherBar extends StatefulWidget {
   const SearcherBar({
@@ -25,15 +21,13 @@ class SearcherBar extends StatefulWidget {
 }
 
 class _SearcherBarState extends State<SearcherBar> {
-  final double padding = 14.0;
   final TextEditingController _textEditingController = TextEditingController();
-  FocusNode _searchBarFocusNode = FocusNode();
-  final SearcherBloc searcherBloc = SearcherBloc();
+  final FocusNode _searchBarFocusNode = FocusNode();
+  final FocusNode _suggestionsFocusNode = FocusNode();
 
   @override
   void dispose() {
     _searchBarFocusNode.dispose();
-    searcherBloc.close();
     super.dispose();
   }
 
@@ -42,107 +36,151 @@ class _SearcherBarState extends State<SearcherBar> {
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 850, minWidth: 700),
-        child: BlocProvider<SearcherBloc>.value(
-          value: searcherBloc,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Material(
-                elevation: 15.0,
-                color: searcherBloc.incognito
-                    ? Colors.grey[800]
-                    : Colors.grey[400],
-                borderRadius: BorderRadius.circular(32.0),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20.0, right: 8.0),
-                  child: ConstrainedBox(
-                    constraints:
-                        const BoxConstraints(maxHeight: 65, minHeight: 65),
-                    child: Stack(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: padding),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: ShiftRightFixer(
-                                  child: TextField(
-                                    controller: _textEditingController,
-                                    autofocus: true,
-                                    focusNode: _searchBarFocusNode,
-                                    textAlignVertical: TextAlignVertical.center,
-                                    style: TextStyle(
-                                        color: searcherBloc.incognito
-                                            ? Colors.grey[200]
-                                            : Colors.black),
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      hintText: 'Search...',
-                                      hintStyle: TextStyle(
-                                          fontStyle: FontStyle.italic),
-                                    ),
-                                    onSubmitted: (query) =>
-                                        searcherBloc.add(TextSubmitted(query)),
-                                    onChanged: (query) =>
-                                        searcherBloc.add(TextChanged(query)),
-                                  ),
-                                ),
-                              ),
-                              BlocBuilder<SearcherBloc, SearcherState>(
-                                builder: (context, state) {
-                                  SearcherMode mode = SearcherMode.search;
-                                  if (state is SearcherSuggestionsDone) {
-                                    mode = state.searcherMode;
-                                  } else if (state
-                                      is SearcherSuggestionsLoading) {
-                                    mode = state.searcherMode;
-                                  }
-                                  return SearcherButtons(
-                                      initialSearcherMode: mode);
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: SizedBox(
-                            height: padding,
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 4.0),
-                              child: ListView(
-                                scrollDirection: Axis.horizontal,
-                                children: [
-                                  GroupChip(selected: false),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Consumer<SearcherAppState>(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: SizedBox(
+                    height: 12,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          GroupChip(selected: false),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              LayoutBuilder(builder: (context, constraints) {
-                final double maxHeight = MediaQuery.of(context).size.height;
-                return ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: maxHeight - 94),
-                  child: BlocBuilder<SearcherBloc, SearcherState>(
-                    builder: (context, state) {
-                      if (state is SearcherSuggestionsDone) {
-                        final suggestionsMap = state.suggestions;
-                        final formattedQuery = state.formattedText;
-                        final List<String> suggestionsList =
-                            suggestionsMap.keys.toList();
-                        final List<String> descriptionsList =
-                            suggestionsMap.values.toList();
-                        final bolded = formattedQuery.toLowerCase();
-                        if (bolded.isNotEmpty && suggestionsList.isNotEmpty) {
-                          return ListView.builder(
+                builder: (context, state, child) {
+                  return Material(
+                    elevation: 15.0,
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(25.0),
+                    child: SizedBox(
+                      height: 65,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(25.0),
+                        child: Stack(
+                          children: [
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: AnimatedWaves(),
+                            ),
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 500),
+                              decoration: BoxDecoration(
+                                color: state.incognito
+                                    ? Colors.grey[800]!.withOpacity(0.64)
+                                    : Colors.grey[400]!.withOpacity(0.64),
+                                borderRadius: BorderRadius.circular(25.0),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 20.0, right: 8.0),
+                                child: Stack(
+                                  children: [
+                                    Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 14.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            child: ShiftRightFixer(
+                                              suggestionsFocusNode:
+                                                  _suggestionsFocusNode,
+                                              child: BlocListener<SearcherBloc,
+                                                  SearcherState>(
+                                                bloc: state.searcherBloc,
+                                                listener: (context, state) {
+                                                  if (state
+                                                      is SearcherSuggestionsClear) {
+                                                    _textEditingController
+                                                        .clear();
+                                                    _searchBarFocusNode
+                                                        .requestFocus();
+                                                  }
+                                                },
+                                                child: TextField(
+                                                  controller:
+                                                      _textEditingController,
+                                                  autofocus: true,
+                                                  focusNode:
+                                                      _searchBarFocusNode,
+                                                  textAlignVertical:
+                                                      TextAlignVertical.center,
+                                                  style: TextStyle(
+                                                      color: state.incognito
+                                                          ? Colors.grey[200]
+                                                          : Colors.black),
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    border: InputBorder.none,
+                                                    hintText: 'Search...',
+                                                    hintStyle: const TextStyle(
+                                                        fontStyle:
+                                                            FontStyle.italic),
+                                                  ),
+                                                  onSubmitted: (query) =>
+                                                      state.run(query),
+                                                  onChanged: (query) => state
+                                                      .getSuggestions(query),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          SearcherButtons(
+                                            initialSearcherMode:
+                                                state.currentSearcherMode,
+                                            clear: () => state.searcherBloc
+                                                .add(ClearSuggestions()),
+                                            submit: () => state.run(
+                                                _textEditingController.text),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    child!,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+            LayoutBuilder(builder: (context, constraints) {
+              final double maxHeight = MediaQuery.of(context).size.height;
+              final double height = min(maxHeight - 95, 410);
+              return SizedBox(
+                height: height,
+                child: BlocBuilder<SearcherBloc, SearcherState>(
+                  bloc: Provider.of<SearcherAppState>(context, listen: false)
+                      .searcherBloc,
+                  builder: (context, state) {
+                    if (state is SearcherSuggestionsDone) {
+                      final suggestionsMap = state.suggestions;
+                      final formattedQuery = state.formattedText;
+                      print(formattedQuery);
+                      final List<String> suggestionsList =
+                          suggestionsMap.keys.toList();
+                      final List<String> descriptionsList =
+                          suggestionsMap.values.toList();
+                      final bolded = formattedQuery.toLowerCase();
+                      if (bolded.isNotEmpty && suggestionsList.isNotEmpty) {
+                        return Focus(
+                          focusNode: _suggestionsFocusNode,
+                          child: ListView.builder(
                             itemCount: suggestionsList.length,
                             itemExtent: 50.0,
                             shrinkWrap: true,
@@ -217,11 +255,9 @@ class _SearcherBarState extends State<SearcherBar> {
                                   child: ListTile(
                                     title: title,
                                     subtitle: hasDescription
-                                        ? Text(
-                                            descriptionsList[index],
+                                        ? Text(descriptionsList[index],
                                             style: TextStyle(
-                                                color: Colors.grey[500]),
-                                          )
+                                                color: Colors.grey[500]))
                                         : null,
                                     visualDensity: VisualDensity.compact,
                                     dense: hasDescription,
@@ -229,8 +265,10 @@ class _SearcherBarState extends State<SearcherBar> {
                                     hoverColor: Colors.black12,
                                     contentPadding:
                                         EdgeInsets.symmetric(horizontal: 4.0),
-                                    onTap: () => searcherBloc
-                                        .add(TextSubmitted(suggestion)),
+                                    onTap: () => Provider.of<SearcherAppState>(
+                                            context,
+                                            listen: false)
+                                        .runInCurrentMode(suggestion),
                                   ),
                                   decoration: BoxDecoration(
                                       border: Border(
@@ -239,16 +277,16 @@ class _SearcherBarState extends State<SearcherBar> {
                                 ),
                               );
                             },
-                          );
-                        }
+                          ),
+                        );
                       }
-                      return Container();
-                    },
-                  ),
-                );
-              })
-            ],
-          ),
+                    }
+                    return SizedBox(width: 0, height: 0);
+                  },
+                ),
+              );
+            })
+          ],
         ),
       ),
     );
@@ -264,9 +302,13 @@ final Map<String, String> searcherCommands = {
 // Code from:
 // https://github.com/flutter/flutter/issues/75675#issuecomment-831581709.
 class ShiftRightFixer extends StatefulWidget {
-  ShiftRightFixer({required this.child});
+  ShiftRightFixer({
+    required this.child,
+    required this.suggestionsFocusNode,
+  });
 
   final Widget child;
+  final FocusNode suggestionsFocusNode;
 
   @override
   State<StatefulWidget> createState() => _ShiftRightFixerState();
@@ -287,6 +329,13 @@ class _ShiftRightFixerState extends State<ShiftRightFixer> {
     return Focus(
       focusNode: focus,
       onKey: (_, RawKeyEvent event) {
+        if (event.physicalKey == PhysicalKeyboardKey.numpad2 ||
+            event.physicalKey == PhysicalKeyboardKey.arrowDown) {
+          print('hey');
+          widget.suggestionsFocusNode.nextFocus();
+          // widget.suggestionsFocusNode.requestFocus();
+          return KeyEventResult.handled;
+        }
         return event.physicalKey == PhysicalKeyboardKey.shiftRight
             ? KeyEventResult.handled
             : KeyEventResult.ignored;

@@ -1,11 +1,12 @@
-import 'dart:async';
-import 'dart:io';
+import 'dart:math';
+
 import 'package:flutter_acrylic/flutter_acrylic.dart';
-import 'package:path/path.dart' as p;
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:searcher_app/States/Provider/searcher_app_state.dart';
 import 'package:searcher_app/Widgets/Searcher%20Bar/searcher_bar.dart';
-import 'package:system_tray/system_tray.dart';
+import 'Widgets/Searcher Bar/local widgets/animated_waves.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,41 +48,44 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: WindowTitleBarBox(
-        child: WindowBorder(
-          color: Colors.black,
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 26.0),
-                  child: SearcherBar(),
-                ),
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Container(
-                    height: 20.0,
-                    // TODO: Make this color a settings.
-                    color: Colors.black45,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: MoveWindow(),
-                        ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 6.0),
-                            child: WindowButtons(),
-                          ),
-                        ),
-                      ],
-                    ),
+      home: ChangeNotifierProvider<SearcherAppState>(
+        create: (_) => SearcherAppState(),
+        child: WindowTitleBarBox(
+          child: WindowBorder(
+            color: Colors.black,
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 26.0),
+                    child: SearcherBar(),
                   ),
-                )
-              ],
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      height: 20.0,
+                      // TODO: Make this color a settings.
+                      color: Colors.black45,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: MoveWindow(),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 6.0),
+                              child: WindowButtons(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),

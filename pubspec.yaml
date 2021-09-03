@@ -40,6 +40,9 @@ dependencies:
   string_similarity: ^2.0.0
   equatable: ^2.0.3
   flutter_bloc: ^7.2.0
+  wave: ^0.2.0
+  glass_kit: ^2.0.1
+  glassmorphism_ui: ^0.2.0
 
 dev_dependencies:
   flutter_test:
