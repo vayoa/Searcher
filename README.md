@@ -1,6 +1,6 @@
 # searcher_app
 
-A utility program to streamline simple internet searches.
+A utility program to streamline simple internet searches (among other stuff).
 
 ## Getting Started
 
