@@ -20,3 +20,10 @@ class ClosePreview extends SearcherPreviewEvent {
 
   const ClosePreview({required this.preview});
 }
+
+class MovePreview extends SearcherPreviewEvent {
+  final int from;
+  final int to;
+
+  const MovePreview({required this.from, required this.to});
+}

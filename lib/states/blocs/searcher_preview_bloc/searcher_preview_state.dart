@@ -15,6 +15,10 @@ class AutocompletePreview extends SearcherPreviewState {
       : super(title: 'Autocomplete', preview: const SearcherBarAutocomplete());
 }
 
+class NotesPreview extends SearcherPreviewState {
+  NotesPreview() : super(title: 'Autocomplete', preview: const SearcherNotesPreview());
+}
+
 class DummyPreview extends SearcherPreviewState {
   DummyPreview()
       : super(title: 'Dummy Preview', preview: Container(color: Colors.white));
@@ -57,4 +61,3 @@ class RemovedPreview extends SearcherPreviewState {
     required this.from,
   }) : super(title: title, preview: preview);
 }
-

@@ -7,7 +7,7 @@ class SearcherCommands {
     'incognito': SearcherCommand(
       name: 'incognito',
       description:
-          'Switches whether Chrome will open in incognito mode or not.',
+      'Switches whether Chrome will open in incognito mode or not.',
       type: SearcherCommandType.setting,
       command: (appState) {
         appState.switchIncognito();
@@ -25,7 +25,9 @@ class SearcherCommands {
       description: 'Display all of your saved notes.',
       type: SearcherCommandType.action,
       iconData: Icons.folder_rounded,
-      command: (_) {},
+      command: (appState) {
+        appState.previewBloc.add(OpenPreview(preview: NotesPreview()));
+      },
     ),
     'expand': SearcherCommand(
       name: 'expand',
@@ -40,6 +42,22 @@ class SearcherCommands {
       type: SearcherCommandType.action,
       command: (appState) {
         appState.previewBloc.add(OpenPreview(preview: DummyPreview()));
+      },
+    ),
+    'next': SearcherCommand(
+      name: 'next',
+      description: 'Focus on the next preview.',
+      type: SearcherCommandType.action,
+      command: (appState) {
+        appState.previewBloc.add(NextPreview());
+      },
+    ),
+    'previous': SearcherCommand(
+      name: 'previous',
+      description: 'Focus on the previous preview.',
+      type: SearcherCommandType.action,
+      command: (appState) {
+        appState.previewBloc.add(PreviousPreview());
       },
     ),
   };

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:searcher_app/states/blocs/searcher_bloc/searcher_bloc.dart';
+import 'package:searcher_app/states/blocs/searcher_preview_bloc/searcher_preview_bloc.dart';
 import 'package:searcher_app/states/provider/searcher_app_state.dart';
 import 'package:searcher_app/widgets/searcher_bar/local_widgets/animated_waves.dart';
 import 'package:searcher_app/widgets/searcher_bar/local_widgets/searcher_buttons.dart';
@@ -190,6 +191,22 @@ class _ShiftRightFixerState extends State<ShiftRightFixer> {
     return Focus(
       focusNode: focus,
       onKey: (_, RawKeyEvent event) {
+        // FIXME: This gets triggered multiple times if we hold the keys.
+        if (event.physicalKey == PhysicalKeyboardKey.numpad4 ||
+            event.physicalKey == PhysicalKeyboardKey.arrowLeft) {
+          if (event.isAltPressed) {
+            Provider.of<SearcherAppState>(context, listen: false)
+                .previewBloc
+                .add(PreviousPreview());
+          }
+        } else if (event.physicalKey == PhysicalKeyboardKey.numpad6 ||
+            event.physicalKey == PhysicalKeyboardKey.arrowRight) {
+          if (event.isAltPressed) {
+            Provider.of<SearcherAppState>(context, listen: false)
+                .previewBloc
+                .add(NextPreview());
+          }
+        }
         return event.physicalKey == PhysicalKeyboardKey.shiftRight
             ? KeyEventResult.handled
             : KeyEventResult.ignored;

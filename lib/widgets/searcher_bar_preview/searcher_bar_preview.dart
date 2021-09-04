@@ -15,7 +15,35 @@ class SearcherBarPreview extends StatefulWidget {
 }
 
 class _SearcherBarPreviewState extends State<SearcherBarPreview> {
-  final GlobalKey<AnimatedListState> _animatedListKey = GlobalKey();
+  List<PreviewTitle> previewTitles = [];
+  List<GlobalKey<_PreviewTitleState>> keys = [];
+
+  @override
+  void initState() {
+    _fillLists(previewTitles, keys);
+    super.initState();
+  }
+
+  _fillLists(
+      List<PreviewTitle> titles, List<GlobalKey<_PreviewTitleState>> keys) {
+    final bloc =
+        Provider.of<SearcherAppState>(context, listen: false).previewBloc;
+    for (var i = 0; i < bloc.previews.length; i++) {
+      final preview = bloc.previews[i];
+      /* TODO: If adding the ability of multiple instances of the same preview
+          type, make sure this is either changed or accounted for. */
+      final key = GlobalKey<_PreviewTitleState>();
+      keys.add(key);
+      titles.add(PreviewTitle(key: key, title: preview.title, shown: i == 0));
+    }
+  }
+
+  updateShownFlag() {
+    final List<PreviewTitle> newList = [];
+    keys = [];
+    _fillLists(newList, keys);
+    previewTitles = newList;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +61,7 @@ class _SearcherBarPreviewState extends State<SearcherBarPreview> {
                 SizedBox(
                   height: height,
                   child: BlocBuilder<SearcherPreviewBloc, SearcherPreviewState>(
-                    builder: (context, state) {
-                      return state.preview;
-                    },
+                    builder: (context, state) => state.preview,
                   ),
                 ),
                 Divider(
@@ -48,35 +74,39 @@ class _SearcherBarPreviewState extends State<SearcherBarPreview> {
                   child:
                       BlocConsumer<SearcherPreviewBloc, SearcherPreviewState>(
                     listener: (context, state) {
+                      final bloc =
+                          BlocProvider.of<SearcherPreviewBloc>(context);
                       if (state is UpdatingPreview) {
-                        _animatedListKey.currentState!.removeItem(
-                            state.from,
-                            (context, animation) =>
-                                PreviewTitle(title: state.title, shown: false));
-                        _animatedListKey.currentState!.insertItem(state.to);
+                        final preview = previewTitles[state.from];
+                        final previous = previewTitles[state.to];
+                        previewTitles[state.from] = previous;
+                        previewTitles[state.to] = preview;
                       } else if (state is RemovedPreview) {
-                        _animatedListKey.currentState!.removeItem(
-                            state.from,
-                            (context, animation) =>
-                                PreviewTitle(title: state.title, shown: false));
+                        keys[state.from].currentState!.reverse();
+                        previewTitles.removeAt(state.from);
                       } else if (state is AddedPreview) {
-                        _animatedListKey.currentState!.insertItem(state.to);
+                        final key = GlobalKey<_PreviewTitleState>();
+                        keys.insert(state.to, key);
+                        previewTitles.insert(
+                            state.to,
+                            PreviewTitle(
+                                key: key,
+                                title: state.title,
+                                shown: state.to == 0));
+                        key.currentState!.forward();
                       }
+                      updateShownFlag();
                     },
                     builder: (context, state) {
                       final bloc =
                           BlocProvider.of<SearcherPreviewBloc>(context);
-                      return AnimatedList(
-                        key: _animatedListKey,
-                        physics: const AlwaysScrollableScrollPhysics(),
+                      return ReorderableListView.builder(
                         scrollDirection: Axis.horizontal,
-                        initialItemCount: bloc.previews.length,
-                        itemBuilder: (context, index, animation) {
-                          return PreviewTitle(
-                            title: bloc.previews[index].title,
-                            shown: index == 0,
-                            last: index == bloc.previews.length - 1,
-                          );
+                        itemCount: bloc.previews.length,
+                        itemBuilder: (context, index) => previewTitles[index],
+                        onReorder: (int oldIndex, int newIndex) {
+                          if (newIndex == bloc.previews.length) newIndex--;
+                          bloc.add(MovePreview(from: oldIndex, to: newIndex));
                         },
                       );
                     },
@@ -91,7 +121,7 @@ class _SearcherBarPreviewState extends State<SearcherBarPreview> {
   }
 }
 
-class PreviewTitle extends StatelessWidget {
+class PreviewTitle extends StatefulWidget {
   const PreviewTitle({
     Key? key,
     required this.title,
@@ -104,26 +134,50 @@ class PreviewTitle extends StatelessWidget {
   final bool last;
 
   @override
+  _PreviewTitleState createState() => _PreviewTitleState();
+}
+
+class _PreviewTitleState extends State<PreviewTitle>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animationController;
+
+  @override
+  void initState() {
+    _animationController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+    super.initState();
+  }
+
+  forward() => _animationController.forward();
+
+  reverse() => _animationController.reverse();
+
+  @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          this.title,
-          style: TextStyle(
-            fontSize: 10.0,
-            color: this.shown ? Colors.white.withOpacity(0.5) : Colors.black45,
+    return FadeTransition(
+      opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_animationController),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            this.widget.title,
+            style: TextStyle(
+              fontSize: 10.0,
+              color: this.widget.shown
+                  ? Colors.white.withOpacity(0.5)
+                  : Colors.black45,
+            ),
           ),
-        ),
-        last
-            ? Container(width: 0, height: 0)
-            : VerticalDivider(
-                thickness: 1.0,
-                width: 8.0,
-                indent: 3.0,
-                endIndent: 2.0,
-              ),
-      ],
+          widget.last
+              ? Container(width: 0, height: 0)
+              : VerticalDivider(
+                  thickness: 1.0,
+                  width: 8.0,
+                  indent: 3.0,
+                  endIndent: 2.0,
+                ),
+        ],
+      ),
     );
   }
 }
