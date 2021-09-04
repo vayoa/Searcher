@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +7,7 @@ import 'package:searcher_app/states/blocs/searcher_bloc/searcher_bloc.dart';
 import 'package:searcher_app/states/provider/searcher_app_state.dart';
 import 'package:searcher_app/widgets/searcher_bar/local_widgets/animated_waves.dart';
 import 'package:searcher_app/widgets/searcher_bar/local_widgets/searcher_buttons.dart';
+import 'package:searcher_app/widgets/searcher_bar_preview/searcher_bar_preview.dart';
 
 import 'local_widgets/group_chip.dart';
 
@@ -23,7 +23,6 @@ class SearcherBar extends StatefulWidget {
 class _SearcherBarState extends State<SearcherBar> {
   final TextEditingController _textEditingController = TextEditingController();
   final FocusNode _searchBarFocusNode = FocusNode();
-  final FocusNode _suggestionsFocusNode = FocusNode();
 
   @override
   void dispose() {
@@ -95,8 +94,6 @@ class _SearcherBarState extends State<SearcherBar> {
                                         children: [
                                           Expanded(
                                             child: ShiftRightFixer(
-                                              suggestionsFocusNode:
-                                                  _suggestionsFocusNode,
                                               child: BlocListener<SearcherBloc,
                                                   SearcherState>(
                                                 bloc: state.searcherBloc,
@@ -159,133 +156,7 @@ class _SearcherBarState extends State<SearcherBar> {
                     ),
                   );
                 }),
-            LayoutBuilder(builder: (context, constraints) {
-              final double maxHeight = MediaQuery.of(context).size.height;
-              final double height = min(maxHeight - 95, 410);
-              return SizedBox(
-                height: height,
-                child: BlocBuilder<SearcherBloc, SearcherState>(
-                  bloc: Provider.of<SearcherAppState>(context, listen: false)
-                      .searcherBloc,
-                  builder: (context, state) {
-                    if (state is SearcherSuggestionsDone) {
-                      final suggestionsMap = state.suggestions;
-                      final formattedQuery = state.formattedText;
-                      print(formattedQuery);
-                      final List<String> suggestionsList =
-                          suggestionsMap.keys.toList();
-                      final List<String> descriptionsList =
-                          suggestionsMap.values.toList();
-                      final bolded = formattedQuery.toLowerCase();
-                      if (bolded.isNotEmpty && suggestionsList.isNotEmpty) {
-                        return Focus(
-                          focusNode: _suggestionsFocusNode,
-                          child: ListView.builder(
-                            itemCount: suggestionsList.length,
-                            itemExtent: 50.0,
-                            shrinkWrap: true,
-                            itemBuilder: (context, index) {
-                              final hasDescription =
-                                  descriptionsList[index].isNotEmpty;
-                              final suggestion = suggestionsList[index];
-                              final boldedIndex = suggestion.indexOf(bolded);
-                              RichText title;
-                              if (boldedIndex == -1) {
-                                title = RichText(
-                                    text: TextSpan(
-                                        text: suggestion,
-                                        style: TextStyle(
-                                            color: Colors.grey[300])));
-                              } else if (boldedIndex == 0) {
-                                final remainder =
-                                    suggestion.substring(bolded.length);
-                                title = RichText(
-                                  text: TextSpan(
-                                      text: bolded,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey[300]),
-                                      children: [
-                                        TextSpan(
-                                            text: remainder,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.normal))
-                                      ]),
-                                );
-                              } else if (boldedIndex !=
-                                  suggestion.length - bolded.length) {
-                                final left =
-                                    suggestion.substring(0, boldedIndex);
-                                final right = suggestion
-                                    .substring(boldedIndex + bolded.length);
-                                title = RichText(
-                                  text: TextSpan(
-                                      text: left,
-                                      style: TextStyle(color: Colors.grey[300]),
-                                      children: [
-                                        TextSpan(
-                                            text: bolded,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold)),
-                                        TextSpan(
-                                            text: right,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.normal))
-                                      ]),
-                                );
-                              } else {
-                                final remainder =
-                                    suggestion.substring(0, boldedIndex);
-                                title = RichText(
-                                    text: TextSpan(
-                                        text: remainder,
-                                        style:
-                                            TextStyle(color: Colors.grey[300]),
-                                        children: [
-                                      TextSpan(
-                                          text: bolded,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold))
-                                    ]));
-                              }
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 24.0),
-                                child: Container(
-                                  child: ListTile(
-                                    title: title,
-                                    subtitle: hasDescription
-                                        ? Text(descriptionsList[index],
-                                            style: TextStyle(
-                                                color: Colors.grey[500]))
-                                        : null,
-                                    visualDensity: VisualDensity.compact,
-                                    dense: hasDescription,
-                                    minVerticalPadding: 0.0,
-                                    hoverColor: Colors.black12,
-                                    contentPadding:
-                                        EdgeInsets.symmetric(horizontal: 4.0),
-                                    onTap: () => Provider.of<SearcherAppState>(
-                                            context,
-                                            listen: false)
-                                        .runInCurrentMode(suggestion),
-                                  ),
-                                  decoration: BoxDecoration(
-                                      border: Border(
-                                          bottom: BorderSide(
-                                              color: Colors.black26))),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      }
-                    }
-                    return SizedBox(width: 0, height: 0);
-                  },
-                ),
-              );
-            })
+            SearcherBarPreview()
           ],
         ),
       ),
@@ -293,22 +164,12 @@ class _SearcherBarState extends State<SearcherBar> {
   }
 }
 
-final Map<String, String> searcherCommands = {
-  'incognito': 'Switches whether Chrome will open in incognito mode or not.',
-  'note': 'Save a new note.',
-  'notes': 'Display all of your saved notes.',
-};
-
 // Code from:
 // https://github.com/flutter/flutter/issues/75675#issuecomment-831581709.
 class ShiftRightFixer extends StatefulWidget {
-  ShiftRightFixer({
-    required this.child,
-    required this.suggestionsFocusNode,
-  });
+  ShiftRightFixer({Key? key, required this.child}) : super(key: key);
 
   final Widget child;
-  final FocusNode suggestionsFocusNode;
 
   @override
   State<StatefulWidget> createState() => _ShiftRightFixerState();
@@ -329,13 +190,6 @@ class _ShiftRightFixerState extends State<ShiftRightFixer> {
     return Focus(
       focusNode: focus,
       onKey: (_, RawKeyEvent event) {
-        if (event.physicalKey == PhysicalKeyboardKey.numpad2 ||
-            event.physicalKey == PhysicalKeyboardKey.arrowDown) {
-          print('hey');
-          widget.suggestionsFocusNode.nextFocus();
-          // widget.suggestionsFocusNode.requestFocus();
-          return KeyEventResult.handled;
-        }
         return event.physicalKey == PhysicalKeyboardKey.shiftRight
             ? KeyEventResult.handled
             : KeyEventResult.ignored;

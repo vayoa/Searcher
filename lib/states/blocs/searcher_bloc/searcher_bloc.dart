@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:searcher_app/modals/searcher_commands.dart';
 import 'package:searcher_app/states/provider/searcher_app_state.dart';
 import 'package:searcher_app/widgets/searcher_bar/searcher_bar.dart';
 import 'package:string_similarity/string_similarity.dart';
@@ -61,9 +62,8 @@ class SearcherBloc extends Bloc<SearcherEvent, SearcherState> {
         'https://www.google.com/complete/search?q=$query&hl=en&client=chrome'));
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
-      final suggestions = List.generate(
-          json[1].length,
-          (index) => json[1][index].toString());
+      final suggestions =
+          List.generate(json[1].length, (index) => json[1][index].toString());
       return Map.fromIterable(suggestions, value: (e) => '');
     }
     return const {};
@@ -71,11 +71,12 @@ class SearcherBloc extends Bloc<SearcherEvent, SearcherState> {
 
   Map<String, String> _getSearcherCommandSuggestions(String command) {
     final Map<String, String> newSuggestions = {};
-    for (String searcherCommand in searcherCommands.keys) {
+    for (String searcherCommand in SearcherCommands.all.keys) {
       final double matchPercentage =
           StringSimilarity.compareTwoStrings(searcherCommand, command);
       if (searcherCommand.contains(command) || matchPercentage >= 0.5)
-        newSuggestions[searcherCommand] = searcherCommands[searcherCommand]!;
+        newSuggestions[searcherCommand] =
+            SearcherCommands.all[searcherCommand]!.description;
     }
     return newSuggestions;
   }

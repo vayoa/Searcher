@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:process_run/shell.dart';
+import 'package:searcher_app/modals/searcher_commands.dart';
 import 'package:searcher_app/states/blocs/searcher_bloc/searcher_bloc.dart';
+import 'package:searcher_app/states/blocs/searcher_preview_bloc/searcher_preview_bloc.dart';
 
 class SearcherAppState extends ChangeNotifier {
-  bool incognito = true;
+  bool _incognito = true;
   SearcherMode _mode = SearcherMode.search;
-  late SearcherBloc searcherBloc;
+  late SearcherBloc _searcherBloc;
+  SearcherPreviewBloc _previewBloc = SearcherPreviewBloc();
 
   SearcherAppState() {
-    searcherBloc = SearcherBloc(this);
+    _searcherBloc = SearcherBloc(this);
   }
+
+  SearcherBloc get searcherBloc => _searcherBloc;
+
+  SearcherPreviewBloc get previewBloc => _previewBloc;
 
   SearcherMode get currentSearcherMode => this._mode;
 
@@ -20,14 +27,20 @@ class SearcherAppState extends ChangeNotifier {
     }
   }
 
+  bool get incognito => _incognito;
+
+  switchIncognito() {
+    _incognito = !_incognito;
+    notifyListeners();
+  }
+
   Future<void> getSuggestions(String text) async {
     if (text.isEmpty) {
-      searcherBloc.add(ClearSuggestions());
-    }
-    else {
+      _searcherBloc.add(ClearSuggestions());
+    } else {
       SearcherMode newMode = SearcherModeParser.fromString(text);
       this.currentSearcherMode = newMode;
-      searcherBloc.add(GetSuggestions(text));
+      _searcherBloc.add(GetSuggestions(text));
     }
   }
 
@@ -51,7 +64,7 @@ class SearcherAppState extends ChangeNotifier {
         search mode after a run. If this behaviour is ever changed make sure to
         change this here as well. */
     currentSearcherMode = SearcherMode.search;
-    searcherBloc.add(ClearSuggestions());
+    _searcherBloc.add(ClearSuggestions());
   }
 
   Future<void> runInMode(SearcherMode mode, String text) async {
@@ -61,7 +74,7 @@ class SearcherAppState extends ChangeNotifier {
 
   Future<void> runSuggestion(String suggestion) async {
     await runInCurrentMode(suggestion);
-    searcherBloc.add(ClearSuggestions());
+    _searcherBloc.add(ClearSuggestions());
   }
 
   Future<void> runInCurrentMode(String text) async {
@@ -87,7 +100,7 @@ class SearcherAppState extends ChangeNotifier {
   Future<void> search(String query, {List<String> websites = const []}) async {
     var shell = Shell();
     String process = 'start chrome ';
-    if (incognito) {
+    if (_incognito) {
       process += '--incognito "? ';
     } else {
       process += '"? ';
@@ -104,12 +117,7 @@ class SearcherAppState extends ChangeNotifier {
   }
 
   runCommand(String command) {
-    switch (command) {
-      case 'incognito':
-        incognito = !incognito;
-        notifyListeners();
-        break;
-    }
+    SearcherCommands.all[command]!.command.call(this);
   }
 }
 
