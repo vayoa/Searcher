@@ -21,6 +21,11 @@ class ClosePreview extends SearcherPreviewEvent {
   const ClosePreview({required this.preview});
 }
 
+class CloseCurrentPreview extends SearcherPreviewEvent {
+
+  const CloseCurrentPreview();
+}
+
 class MovePreview extends SearcherPreviewEvent {
   final int from;
   final int to;

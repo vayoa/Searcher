@@ -43,6 +43,7 @@ dependencies:
   wave: ^0.2.0
   glass_kit: ^2.0.1
   glassmorphism_ui: ^0.2.0
+  implicitly_animated_reorderable_list: ^0.4.1
 
 dev_dependencies:
   flutter_test:

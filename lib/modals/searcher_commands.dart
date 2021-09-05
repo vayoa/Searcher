@@ -7,7 +7,7 @@ class SearcherCommands {
     'incognito': SearcherCommand(
       name: 'incognito',
       description:
-      'Switches whether Chrome will open in incognito mode or not.',
+          'Switches whether Chrome will open in incognito mode or not.',
       type: SearcherCommandType.setting,
       command: (appState) {
         appState.switchIncognito();
@@ -58,6 +58,14 @@ class SearcherCommands {
       type: SearcherCommandType.action,
       command: (appState) {
         appState.previewBloc.add(PreviousPreview());
+      },
+    ),
+    'close': SearcherCommand(
+      name: 'close',
+      description: 'Close the current focused preview.',
+      type: SearcherCommandType.action,
+      command: (appState) {
+        appState.previewBloc.add(CloseCurrentPreview());
       },
     ),
   };
