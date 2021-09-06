@@ -1,11 +1,14 @@
-import 'dart:math';
+import 'dart:math' as math show pi, min;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
 import 'package:implicitly_animated_reorderable_list/transitions.dart';
 import 'package:provider/provider.dart';
+import 'package:searcher_app/states/blocs/searcher_bloc/searcher_bloc.dart';
 import 'package:searcher_app/states/blocs/searcher_preview_bloc/searcher_preview_bloc.dart';
 import 'package:searcher_app/states/provider/searcher_app_state.dart';
+import 'package:searcher_app/widgets/searcher_bar/local_widgets/animated_waves.dart';
+import 'package:searcher_app/widgets/searcher_bar_preview/local_widgets/searcher_bar_autocomplete.dart';
 
 class SearcherBarPreview extends StatefulWidget {
   const SearcherBarPreview({
@@ -24,30 +27,117 @@ class _SearcherBarPreviewState extends State<SearcherBarPreview> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final double maxHeight = MediaQuery.of(context).size.height;
-          final double height = min(maxHeight - 116, 410);
+          final double height = math.min(maxHeight - 116, 410);
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(
-                  height: height,
-                  child: BlocBuilder<SearcherPreviewBloc, SearcherPreviewState>(
-                    builder: (context, state) => state.preview,
-                  ),
+                Stack(
+                  children: [
+                    SizedBox(
+                      height: height,
+                      child: BlocBuilder<SearcherPreviewBloc,
+                          SearcherPreviewState>(
+                        builder: (context, state) => state.preview,
+                      ),
+                    ),
+                    SearcherBarMobileAutocomplete(maxHeight: height),
+                  ],
                 ),
-                Divider(
-                  thickness: 2.0,
-                  height: 1.0,
-                ),
-                Container(
-                  height: 14.0,
-                  color: Colors.transparent,
-                  child:
-                      BlocConsumer<SearcherPreviewBloc, SearcherPreviewState>(
-                    listener: (context, state) {},
-                    builder: (context, state) {
-                      return ImplicitlyAnimatedReorderableList<
+                PreviewTitleBar(),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class SearcherBarMobileAutocomplete extends StatelessWidget {
+  const SearcherBarMobileAutocomplete({
+    Key? key,
+    required this.maxHeight,
+  }) : super(key: key);
+
+  final double maxHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SearcherPreviewBloc, SearcherPreviewState>(
+      builder: (context, state) {
+        if (state is AutocompletePreview) return Container();
+        return BlocBuilder<SearcherBloc, SearcherState>(
+          bloc: Provider.of<SearcherAppState>(context).searcherBloc,
+          builder: (context, state) {
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              transitionBuilder: (child, animation) => SizeFadeTransition(
+                  sizeFraction: 0.8, animation: animation, child: child),
+              child: state is SearcherSuggestionsDone ||
+                      state is SearcherSuggestionsLoading
+                  ? SizedBox(
+                      height: math.min(maxHeight, 270),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16.0,
+                          horizontal: 5.0,
+                        ),
+                        child: Container(
+                          width: 840,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[800],
+                            borderRadius: BorderRadius.circular(16.0),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16.0),
+                            child: Stack(
+                              children: [
+                                Transform.rotate(
+                                    angle: math.pi,
+                                    alignment: Alignment.center,
+                                    child: AnimatedWaves(incognito: true)),
+                                SearcherBarAutocomplete(),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : Container(),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class PreviewTitleBar extends StatelessWidget {
+  const PreviewTitleBar({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SearcherPreviewBloc, SearcherPreviewState>(
+      builder: (context, state) {
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 500),
+          child: BlocProvider.of<SearcherPreviewBloc>(context).previews.length >
+                  1
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Divider(
+                      thickness: 2.0,
+                      height: 1.0,
+                    ),
+                    Container(
+                      height: 14.0,
+                      color: Colors.transparent,
+                      child: ImplicitlyAnimatedReorderableList<
                           SearcherPreviewState>(
                         items: BlocProvider.of<SearcherPreviewBloc>(context,
                                 listen: true)
@@ -97,15 +187,13 @@ class _SearcherBarPreviewState extends State<SearcherBarPreview> {
                             ),
                           );
                         },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
+                      ),
+                    ),
+                  ],
+                )
+              : Container(),
+        );
+      },
     );
   }
 }

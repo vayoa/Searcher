@@ -23,6 +23,8 @@ class SearcherPreviewBloc
 
   int get shown => _shown;
 
+  SearcherPreviewState get currentPreview => _previews[_shown];
+
   /// Returns the index of [preview] in [_previews] if it's in the list.
   /// If not, returns -1.
   /// [instance] is optional. If [preview.single] is false, leave as -1 to

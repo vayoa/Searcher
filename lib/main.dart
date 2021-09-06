@@ -58,33 +58,44 @@ class _MyAppState extends State<MyApp> {
                     padding: const EdgeInsets.only(top: 26.0),
                     child: SearcherBar(),
                   ),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Container(
-                      height: 20.0,
-                      // TODO: Make this color a settings.
-                      color: Colors.black45,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: MoveWindow(),
-                          ),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 6.0),
-                              child: WindowButtons(),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
+                  AppTitleBar()
                 ],
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class AppTitleBar extends StatelessWidget {
+  const AppTitleBar({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Container(
+        height: 20.0,
+        // TODO: Make this color a settings.
+        color: Colors.black45,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: MoveWindow(),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 6.0),
+                child: WindowButtons(),
+              ),
+            ),
+          ],
         ),
       ),
     );
