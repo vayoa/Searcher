@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:searcher_app/modals/searcher_commands.dart';
+import 'package:searcher_app/states/blocs/searcher_preview_bloc/searcher_preview_bloc.dart';
 import 'package:searcher_app/states/provider/searcher_app_state.dart';
-import 'package:searcher_app/widgets/searcher_bar/searcher_bar.dart';
 import 'package:string_similarity/string_similarity.dart';
 import 'package:http/http.dart' as http;
 
@@ -79,4 +79,5 @@ class SearcherBloc extends Bloc<SearcherEvent, SearcherState> {
     }
     return newSuggestions;
   }
+
 }

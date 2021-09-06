@@ -25,10 +25,27 @@ class SearcherPreviewBloc
 
   /// Returns the index of [preview] in [_previews] if it's in the list.
   /// If not, returns -1.
-  int getPreviewIndex(SearcherPreviewState preview) {
+  /// [instance] is optional. If [preview.single] is false, leave as -1 to
+  /// create a new instance of [preview]. Else give the instance of [preview]
+  /// you'd like to focus on.
+  int getPreviewIndex(SearcherPreviewState preview, {int instance = -1}) {
+    print('instance: $instance.');
+    if (!preview.single && instance == -1) return -1;
+    if (preview.single) {
+      final Type previewType = preview.runtimeType;
+      for (var i = 0; i < _previews.length; i++) {
+        if (_previews[i].runtimeType == previewType) {
+          return i;
+        }
+      }
+      return -1;
+    }
     final Type previewType = preview.runtimeType;
     for (var i = 0; i < _previews.length; i++) {
-      if (_previews[i].runtimeType == previewType) return i;
+      if (_previews[i].runtimeType == previewType &&
+          _previews[i].globalID == instance) {
+        return i;
+      }
     }
     return -1;
   }
@@ -39,21 +56,19 @@ class SearcherPreviewBloc
   ) async* {
     if (event is OpenPreview) {
       final SearcherPreviewState preview = event.preview;
-      final int index = getPreviewIndex(preview);
-      if (preview.single && index != -1) {
+      final int index = getPreviewIndex(preview, instance: event.instance);
+      print(index);
+      if (index != -1) {
         if (index != _shown) {
           _shown = index;
-          yield SwitchedCurrentPreview(
-              title: preview.title, preview: preview.preview, newShown: index);
+          yield SwitchedCurrentPreview(previewState: preview, newShown: index);
           yield preview;
         }
       } else {
         _previews.insert(0, preview);
-        yield AddedPreview(
-            title: preview.title, preview: preview.preview, to: 0);
+        yield AddedPreview(previewState: preview, to: 0);
         _shown = 0;
-        yield SwitchedCurrentPreview(
-            title: preview.title, preview: preview.preview, newShown: 0);
+        yield SwitchedCurrentPreview(previewState: preview, newShown: 0);
         yield preview;
       }
     } else if (_previews.length >= 2) {
@@ -62,30 +77,24 @@ class SearcherPreviewBloc
         final int index = getPreviewIndex(preview);
         if (index != -1) {
           _previews.removeAt(index);
-          yield RemovedPreview(
-              title: preview.title, preview: preview.preview, from: index);
+          yield RemovedPreview(previewState: preview, from: index);
           if (_shown != 0 && index <= _shown) {
             _shown--;
             final SearcherPreviewState switchedPreview = _previews[_shown];
             yield SwitchedCurrentPreview(
-                title: switchedPreview.title,
-                preview: switchedPreview.preview,
-                newShown: _shown);
+                previewState: switchedPreview, newShown: _shown);
           }
         }
         yield _previews[_shown];
       } else if (event is CloseCurrentPreview) {
         final SearcherPreviewState preview = _previews[_shown];
         _previews.removeAt(_shown);
-        yield RemovedPreview(
-            title: preview.title, preview: preview.preview, from: _shown);
+        yield RemovedPreview(previewState: preview, from: _shown);
         if (_shown != 0) {
           _shown--;
           final SearcherPreviewState switchedPreview = _previews[_shown];
           yield SwitchedCurrentPreview(
-              title: switchedPreview.title,
-              preview: switchedPreview.preview,
-              newShown: _shown);
+              previewState: switchedPreview, newShown: _shown);
         }
         yield _previews[_shown];
       } else if (event is NextPreview) {
@@ -118,10 +127,7 @@ class SearcherPreviewBloc
           }
           final SearcherPreviewState current = _previews[_shown];
           yield UpdatingPreview(
-              title: current.title,
-              preview: current.preview,
-              from: event.from,
-              to: event.to);
+              previewState: current, from: event.from, to: event.to);
         }
         yield _previews[_shown];
       }
@@ -134,8 +140,7 @@ class SearcherPreviewBloc
     else
       _shown++;
     final SearcherPreviewState preview = _previews[_shown];
-    return SwitchedCurrentPreview(
-        title: preview.title, preview: preview.preview, newShown: _shown);
+    return SwitchedCurrentPreview(previewState: preview, newShown: _shown);
   }
 
   SwitchedCurrentPreview decrementShown() {
@@ -144,7 +149,6 @@ class SearcherPreviewBloc
     else
       _shown--;
     final SearcherPreviewState preview = _previews[_shown];
-    return SwitchedCurrentPreview(
-        title: preview.title, preview: preview.preview, newShown: _shown);
+    return SwitchedCurrentPreview(previewState: preview, newShown: _shown);
   }
 }

@@ -69,7 +69,7 @@ class _SearcherBarPreviewState extends State<SearcherBarPreview> {
                           else if (preview1.single)
                             return preview1.globalID == preview2.globalID;
                           else
-                            return preview1.instanceID == preview2.instanceID;
+                            return preview1.globalID == preview2.globalID;
                         },
                         onReorderFinished: (preview, from, to, newPreviews) {
                           BlocProvider.of<SearcherPreviewBloc>(context)
@@ -81,20 +81,17 @@ class _SearcherBarPreviewState extends State<SearcherBarPreview> {
                           return Reorderable(
                             key: ValueKey(
                                 preview.title + preview.globalID.toString()),
-                            child: Handle(
-                              child: ClipRect(
-                                child: SlideTransition(
-                                  position: Tween<Offset>(
-                                          begin: Offset(-1.0, 0.0),
-                                          end: Offset.zero)
-                                      .animate(CurvedAnimation(
-                                          parent: animation,
-                                          curve: Curves.easeInOut)),
-                                  child: PreviewTitle(
-                                    preview: preview,
-                                    shown: index == bloc.shown,
-                                    last: index == bloc.previews.length - 1,
-                                  ),
+                            child: ClipRect(
+                              child: SlideTransition(
+                                position: Tween<Offset>(
+                                        begin: Offset(-1.0, 0.0),
+                                        end: Offset.zero)
+                                    .animate(CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.easeInOut)),
+                                child: PreviewTitle(
+                                  preview: preview,
+                                  shown: index == bloc.shown,
                                 ),
                               ),
                             ),
@@ -118,38 +115,44 @@ class PreviewTitle extends StatelessWidget {
     Key? key,
     required this.preview,
     required this.shown,
-    this.last = false,
   }) : super(key: key);
 
   final SearcherPreviewState preview;
   final bool shown;
-  final bool last;
 
   @override
   Widget build(BuildContext context) {
+    final int count = preview.instanceID;
     String title = this.preview.title;
-    if (this.preview.instanceID != 0) {
-      title += ' (${this.preview.instanceID})';
+    if (count != 0) {
+      title += ' ($count)';
     }
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 10.0,
-            color: this.shown ? Colors.white.withOpacity(0.5) : Colors.black45,
-          ),
-        ),
-        this.last
-            ? Container(width: 0, height: 0)
-            : VerticalDivider(
-                thickness: 1.0,
-                width: 8.0,
-                indent: 3.0,
-                endIndent: 2.0,
+    return GestureDetector(
+      onTap: () {
+        BlocProvider.of<SearcherPreviewBloc>(context)
+            .add(OpenPreview(preview: preview, instance: preview.globalID));
+      },
+      child: Handle(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 10.0,
+                color:
+                    this.shown ? Colors.white.withOpacity(0.5) : Colors.black45,
               ),
-      ],
+            ),
+            VerticalDivider(
+              thickness: 1.0,
+              width: 8.0,
+              indent: 3.0,
+              endIndent: 2.0,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

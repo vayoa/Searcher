@@ -5,34 +5,66 @@ abstract class SearcherPreviewState {
   final String title;
   final Widget preview;
   final bool single;
-  static int globalPreviewCount = 0;
-  final int globalID = globalPreviewCount;
+  final int globalID;
 
   SearcherPreviewState({
     required this.title,
     required this.preview,
     this.single = true,
-  }) {
-    globalPreviewCount++;
-  }
+    required this.globalID,
+  });
 
   int get instanceID => 0;
 }
 
+@immutable
+abstract class PreviewStateNotifier extends SearcherPreviewState {
+  final SearcherPreviewState previewState;
+
+  PreviewStateNotifier({required this.previewState})
+      : super(
+            title: previewState.title,
+            preview: previewState.preview,
+            single: previewState.single,
+            globalID: previewState.globalID);
+}
+
+@immutable
+abstract class SearcherPreview extends SearcherPreviewState {
+  final String title;
+  final Widget preview;
+  final bool single;
+  static int globalPreviewCount = 0;
+  late final int globalID;
+
+  SearcherPreview({
+    required this.title,
+    required this.preview,
+    this.single = true,
+  }) : super(
+            title: title,
+            preview: preview,
+            single: single,
+            globalID: globalPreviewCount) {
+    this.globalID = globalPreviewCount;
+    globalPreviewCount++;
+  }
+}
+
 class SearcherPreviewInitial extends AutocompletePreview {}
 
-class AutocompletePreview extends SearcherPreviewState {
+class AutocompletePreview extends SearcherPreview {
   AutocompletePreview()
       : super(title: 'Autocomplete', preview: const SearcherBarAutocomplete());
 }
 
-class NotesPreview extends SearcherPreviewState {
+class NotesPreview extends SearcherPreview {
   NotesPreview() : super(title: 'Notes', preview: const SearcherNotesPreview());
 }
 
-class DummyPreview extends SearcherPreviewState {
-  static int _instanceCount = 0;
+class DummyPreview extends SearcherPreview {
   static final Random rnd = new Random();
+  static int dummyPreviewCount = 0;
   late final int _instanceID;
 
   DummyPreview()
@@ -47,60 +79,53 @@ class DummyPreview extends SearcherPreviewState {
           )),
           single: false,
         ) {
-    _instanceID = _instanceCount;
-    _instanceCount++;
+    this._instanceID = dummyPreviewCount;
+    dummyPreviewCount++;
   }
 
   @override
   int get instanceID => _instanceID;
+
 }
 
-class UpdatingPreview extends SearcherPreviewState {
-  final String title;
-  final Widget preview;
+class UpdatingPreview extends PreviewStateNotifier {
+  final SearcherPreviewState previewState;
   final int from;
   final int to;
 
   UpdatingPreview({
-    required this.title,
-    required this.preview,
+    required this.previewState,
     required this.from,
     required this.to,
-  }) : super(title: title, preview: preview);
+  }) : super(previewState: previewState);
 }
 
-class AddedPreview extends SearcherPreviewState {
-  final String title;
-  final Widget preview;
+class AddedPreview extends PreviewStateNotifier {
+  final SearcherPreviewState previewState;
   final int to;
 
   AddedPreview({
-    required this.title,
-    required this.preview,
+    required this.previewState,
     required this.to,
-  }) : super(title: title, preview: preview);
+  }) : super(previewState: previewState);
 }
 
-class RemovedPreview extends SearcherPreviewState {
-  final String title;
-  final Widget preview;
+class RemovedPreview extends PreviewStateNotifier {
+  final SearcherPreviewState previewState;
   final int from;
 
   RemovedPreview({
-    required this.title,
-    required this.preview,
+    required this.previewState,
     required this.from,
-  }) : super(title: title, preview: preview);
+  }) : super(previewState: previewState);
 }
 
-class SwitchedCurrentPreview extends SearcherPreviewState {
-  final String title;
-  final Widget preview;
+class SwitchedCurrentPreview extends PreviewStateNotifier {
+  final SearcherPreviewState previewState;
   final int newShown;
 
   SwitchedCurrentPreview({
-    required this.title,
-    required this.preview,
+    required this.previewState,
     required this.newShown,
-  }) : super(title: title, preview: preview);
+  }) : super(previewState: previewState);
 }

@@ -11,8 +11,17 @@ class PreviousPreview extends SearcherPreviewEvent {}
 
 class OpenPreview extends SearcherPreviewEvent {
   final SearcherPreviewState preview;
+  final int instance;
 
-  const OpenPreview({required this.preview});
+  /// Constructs a new OpenPreview event.
+  /// [preview] is the new preview to be opened.
+  /// [instance] is optional, if specified and preview isn't a of single
+  /// type we won't create a new preview but instead we'll focus on the
+  /// instance of that preview.
+  const OpenPreview({
+    required this.preview,
+    this.instance = -1,
+  });
 }
 
 class ClosePreview extends SearcherPreviewEvent {
@@ -22,7 +31,6 @@ class ClosePreview extends SearcherPreviewEvent {
 }
 
 class CloseCurrentPreview extends SearcherPreviewEvent {
-
   const CloseCurrentPreview();
 }
 
