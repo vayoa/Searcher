@@ -100,8 +100,6 @@ class SearcherPreviewBloc
             event.from <= _previews.length &&
             event.to <= _previews.length &&
             event.from != event.to) {
-          print('from: ${event.from}, to: ${event.to}.');
-          print('shown: $_shown.');
           final SearcherPreviewState preview = _previews[event.from];
           _previews.removeAt(event.from);
           _previews.insert(event.to, preview);
@@ -118,7 +116,6 @@ class SearcherPreviewBloc
             else
               yield decrementShown();
           }
-          print('new shown: $_shown.');
           final SearcherPreviewState current = _previews[_shown];
           yield UpdatingPreview(
               title: current.title,

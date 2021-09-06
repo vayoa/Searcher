@@ -17,7 +17,6 @@ class SearcherBarAutocomplete extends StatelessWidget {
         if (state is SearcherSuggestionsDone) {
           final suggestionsMap = state.suggestions;
           final formattedQuery = state.formattedText;
-          print(formattedQuery);
           final List<String> suggestionsList = suggestionsMap.keys.toList();
           final List<String> descriptionsList = suggestionsMap.values.toList();
           final bolded = formattedQuery.toLowerCase();

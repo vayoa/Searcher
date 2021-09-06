@@ -47,7 +47,6 @@ class SearcherBloc extends Bloc<SearcherEvent, SearcherState> {
           yield SearcherSuggestionsDone(command, const {});
           break;
         case SearcherMode.search:
-          print('--$trim--');
           Map<String, String> suggestions = await _getSearchSuggestions(trim);
           yield SearcherSuggestionsDone(trim, suggestions);
           break;
