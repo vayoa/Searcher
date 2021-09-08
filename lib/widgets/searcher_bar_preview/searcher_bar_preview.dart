@@ -21,6 +21,8 @@ class SearcherBarPreview extends StatefulWidget {
 }
 
 class _SearcherBarPreviewState extends State<SearcherBarPreview> {
+  bool previewTitleBarShown = false;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -28,7 +30,8 @@ class _SearcherBarPreviewState extends State<SearcherBarPreview> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final double maxHeight = MediaQuery.of(context).size.height;
-          final double height = math.min(maxHeight - 116, 410);
+          final double height =
+              math.min(maxHeight - (previewTitleBarShown ? 109 : 95), 410);
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
@@ -38,15 +41,26 @@ class _SearcherBarPreviewState extends State<SearcherBarPreview> {
                   children: [
                     SizedBox(
                       height: height,
-                      child: BlocBuilder<SearcherPreviewBloc,
+                      child: BlocConsumer<SearcherPreviewBloc,
                           SearcherPreviewState>(
+                        listener: (context, state) {
+                          setState(() {
+                            previewTitleBarShown =
+                                BlocProvider.of<SearcherPreviewBloc>(context)
+                                        .previews
+                                        .length >
+                                    1;
+                          });
+                        },
                         builder: (context, state) => state.preview,
                       ),
                     ),
                     SearcherBarMobileAutocomplete(maxHeight: height),
                   ],
                 ),
-                PreviewTitleBar(),
+                PreviewTitleBar(
+                  show: previewTitleBarShown,
+                ),
               ],
             ),
           );
@@ -118,83 +132,80 @@ class SearcherBarMobileAutocomplete extends StatelessWidget {
 class PreviewTitleBar extends StatelessWidget {
   const PreviewTitleBar({
     Key? key,
+    required this.show,
   }) : super(key: key);
+
+  final bool show;
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SearcherPreviewBloc, SearcherPreviewState>(
-      builder: (context, state) {
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 500),
-          child: BlocProvider.of<SearcherPreviewBloc>(context).previews.length >
-                  1
-              ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Divider(
-                      thickness: 2.0,
-                      height: 1.0,
-                    ),
-                    Container(
-                      height: 14.0,
-                      color: Colors.black12,
-                      child: ImplicitlyAnimatedReorderableList<
-                          SearcherPreviewState>(
-                        items: BlocProvider.of<SearcherPreviewBloc>(context,
-                                listen: true)
-                            .previews,
-                        scrollDirection: Axis.horizontal,
-                        removeItemBuilder: (context, animation, preview) =>
-                            Reorderable(
-                          key: ValueKey(
-                              preview.title + preview.globalID.toString()),
-                          child: SizeFadeTransition(
-                            animation: animation,
-                            sizeFraction: 0.7,
-                            child: PreviewTitle(preview: preview, shown: false),
-                          ),
-                        ),
-                        areItemsTheSame: (preview1, preview2) {
-                          if (preview1.single != preview2.single)
-                            return false;
-                          else if (preview1.single)
-                            return preview1.globalID == preview2.globalID;
-                          else
-                            return preview1.globalID == preview2.globalID;
-                        },
-                        onReorderFinished: (preview, from, to, newPreviews) {
-                          BlocProvider.of<SearcherPreviewBloc>(context)
-                              .add(MovePreview(from: from, to: to));
-                        },
-                        itemBuilder: (context, animation, preview, index) {
-                          final bloc =
-                              BlocProvider.of<SearcherPreviewBloc>(context);
-                          return Reorderable(
-                            key: ValueKey(
-                                preview.title + preview.globalID.toString()),
-                            child: ClipRect(
-                              child: SlideTransition(
-                                position: Tween<Offset>(
-                                        begin: Offset(-1.0, 0.0),
-                                        end: Offset.zero)
-                                    .animate(CurvedAnimation(
-                                        parent: animation,
-                                        curve: Curves.easeInOut)),
-                                child: PreviewTitle(
-                                  preview: preview,
-                                  shown: index == bloc.shown,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 500),
+      child: show
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Divider(
+                  thickness: 2.0,
+                  height: 1.0,
+                ),
+                Container(
+                  height: 14.0,
+                  color: Colors.black12,
+                  child:
+                      ImplicitlyAnimatedReorderableList<SearcherPreviewState>(
+                    items: BlocProvider.of<SearcherPreviewBloc>(context,
+                            listen: true)
+                        .previews,
+                    scrollDirection: Axis.horizontal,
+                    removeItemBuilder: (context, animation, preview) =>
+                        Reorderable(
+                      key:
+                          ValueKey(preview.title + preview.globalID.toString()),
+                      child: SizeFadeTransition(
+                        animation: animation,
+                        sizeFraction: 0.7,
+                        child: PreviewTitle(preview: preview, shown: false),
                       ),
                     ),
-                  ],
-                )
-              : Container(),
-        );
-      },
+                    areItemsTheSame: (preview1, preview2) {
+                      if (preview1.single != preview2.single)
+                        return false;
+                      else if (preview1.single)
+                        return preview1.globalID == preview2.globalID;
+                      else
+                        return preview1.globalID == preview2.globalID;
+                    },
+                    onReorderFinished: (preview, from, to, newPreviews) {
+                      BlocProvider.of<SearcherPreviewBloc>(context)
+                          .add(MovePreview(from: from, to: to));
+                    },
+                    itemBuilder: (context, animation, preview, index) {
+                      final bloc =
+                          BlocProvider.of<SearcherPreviewBloc>(context);
+                      return Reorderable(
+                        key: ValueKey(
+                            preview.title + preview.globalID.toString()),
+                        child: ClipRect(
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                                    begin: Offset(-1.0, 0.0), end: Offset.zero)
+                                .animate(CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.easeInOut)),
+                            child: PreviewTitle(
+                              preview: preview,
+                              shown: index == bloc.shown,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            )
+          : Container(height: 0, width: 0),
     );
   }
 }
