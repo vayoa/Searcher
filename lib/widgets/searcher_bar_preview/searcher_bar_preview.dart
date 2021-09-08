@@ -1,4 +1,5 @@
 import 'dart:math' as math show pi, min;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
@@ -136,7 +137,7 @@ class PreviewTitleBar extends StatelessWidget {
                     ),
                     Container(
                       height: 14.0,
-                      color: Colors.transparent,
+                      color: Colors.black12,
                       child: ImplicitlyAnimatedReorderableList<
                           SearcherPreviewState>(
                         items: BlocProvider.of<SearcherPreviewBloc>(context,

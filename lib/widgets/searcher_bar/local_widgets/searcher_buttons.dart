@@ -47,18 +47,17 @@ class SearcherButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      skipTraversal: true,
-      canRequestFocus: false,
-      child: Center(
-        child: IconButton(
-          iconSize: 20.0,
-          splashRadius: 20.0,
-          icon: Icon(
-            this.icon,
-          ),
-          onPressed: this.onPressed,
+    final FocusNode _focusNode =
+        FocusNode(canRequestFocus: false, skipTraversal: true);
+    return Center(
+      child: IconButton(
+        focusNode: _focusNode,
+        iconSize: 20.0,
+        splashRadius: 20.0,
+        icon: Icon(
+          this.icon,
         ),
+        onPressed: this.onPressed,
       ),
     );
   }
@@ -152,7 +151,7 @@ class _MainSearcherButtonState extends State<MainSearcherButton>
                     child: IgnorePointer(
                       child: SearcherButton(
                         icon: _getButtonIcon(_newMode),
-                        onPressed: widget.onPressed,
+                        onPressed: () {},
                       ),
                     ),
                   ),
