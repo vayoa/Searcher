@@ -95,7 +95,7 @@ class _SearcherBarState extends State<SearcherBar> {
                                             CrossAxisAlignment.center,
                                         children: [
                                           Expanded(
-                                            child: TextFieldKeyListener(
+                                            child: ShiftRightFixer(
                                               child: BlocListener<SearcherBloc,
                                                   SearcherState>(
                                                 bloc: state.searcherBloc,
@@ -139,11 +139,8 @@ class _SearcherBarState extends State<SearcherBar> {
                                           SearcherButtons(
                                             initialSearcherMode:
                                                 state.currentSearcherMode,
-                                            clear: () {
-                                              _textEditingController.clear();
-                                              state.searcherBloc
-                                                  .add(ClearSuggestions());
-                                            },
+                                            clear: () => state.searcherBloc
+                                                .add(ClearSuggestions()),
                                             submit: () => state.run(
                                                 _textEditingController.text),
                                           ),
@@ -171,16 +168,16 @@ class _SearcherBarState extends State<SearcherBar> {
 
 // Code from:
 // https://github.com/flutter/flutter/issues/75675#issuecomment-831581709.
-class TextFieldKeyListener extends StatefulWidget {
-  TextFieldKeyListener({Key? key, required this.child}) : super(key: key);
+class ShiftRightFixer extends StatefulWidget {
+  ShiftRightFixer({Key? key, required this.child}) : super(key: key);
 
   final Widget child;
 
   @override
-  State<StatefulWidget> createState() => _TextFieldKeyListenerState();
+  State<StatefulWidget> createState() => _ShiftRightFixerState();
 }
 
-class _TextFieldKeyListenerState extends State<TextFieldKeyListener> {
+class _ShiftRightFixerState extends State<ShiftRightFixer> {
   final FocusNode focus =
       FocusNode(skipTraversal: true, canRequestFocus: false);
 
@@ -195,34 +192,20 @@ class _TextFieldKeyListenerState extends State<TextFieldKeyListener> {
     return Focus(
       focusNode: focus,
       onKey: (_, RawKeyEvent event) {
-        if (event is RawKeyDownEvent) {
-          if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-            if (event.isAltPressed) {
-              Provider.of<SearcherAppState>(context, listen: false)
-                  .previewBloc
-                  .add(PreviousPreview());
-              return KeyEventResult.handled;
-            }
-          } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-            if (event.isAltPressed) {
-              Provider.of<SearcherAppState>(context, listen: false)
-                  .previewBloc
-                  .add(NextPreview());
-              return KeyEventResult.handled;
-            }
-          } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-            if (Provider.of<SearcherAppState>(context, listen: false)
-                .searcherBloc
-                .state is SearcherSuggestionsDone) {
-              focus.nextFocus();
-              return KeyEventResult.handled;
-            }
-          } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-            if (Provider.of<SearcherAppState>(context, listen: false)
-                .searcherBloc
-                .state is SearcherSuggestionsDone) {
-              return KeyEventResult.handled;
-            }
+        // FIXME: This gets triggered multiple times if we hold the keys.
+        if (event.physicalKey == PhysicalKeyboardKey.numpad4 ||
+            event.physicalKey == PhysicalKeyboardKey.arrowLeft) {
+          if (event.isAltPressed) {
+            Provider.of<SearcherAppState>(context, listen: false)
+                .previewBloc
+                .add(PreviousPreview());
+          }
+        } else if (event.physicalKey == PhysicalKeyboardKey.numpad6 ||
+            event.physicalKey == PhysicalKeyboardKey.arrowRight) {
+          if (event.isAltPressed) {
+            Provider.of<SearcherAppState>(context, listen: false)
+                .previewBloc
+                .add(NextPreview());
           }
         }
         return event.physicalKey == PhysicalKeyboardKey.shiftRight

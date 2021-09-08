@@ -28,23 +28,31 @@ class _SearcherBarPreviewState extends State<SearcherBarPreview> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final double maxHeight = MediaQuery.of(context).size.height;
-          final double height = math.min(maxHeight - 116, 410);
+          final double height = math.min(maxHeight - 95, 410);
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Stack(
-                  children: [
-                    SizedBox(
-                      height: height,
-                      child: BlocBuilder<SearcherPreviewBloc,
-                          SearcherPreviewState>(
-                        builder: (context, state) => state.preview,
-                      ),
-                    ),
-                    SearcherBarMobileAutocomplete(maxHeight: height),
-                  ],
+                BlocBuilder<SearcherPreviewBloc, SearcherPreviewState>(
+                  builder: (context, state) {
+                    final titleBarShown =
+                        BlocProvider.of<SearcherPreviewBloc>(context)
+                                .previews
+                                .length >
+                            1;
+                    final double dynamicHeight =
+                        height - (titleBarShown ? 14.0 : 0.0);
+                    return Stack(
+                      children: [
+                        SizedBox(
+                          height: dynamicHeight,
+                          child: state.preview,
+                        ),
+                        SearcherBarMobileAutocomplete(maxHeight: dynamicHeight),
+                      ],
+                    );
+                  },
                 ),
                 PreviewTitleBar(),
               ],
@@ -137,7 +145,7 @@ class PreviewTitleBar extends StatelessWidget {
                     ),
                     Container(
                       height: 14.0,
-                      color: Colors.black12,
+                      color: Colors.transparent,
                       child: ImplicitlyAnimatedReorderableList<
                           SearcherPreviewState>(
                         items: BlocProvider.of<SearcherPreviewBloc>(context,
