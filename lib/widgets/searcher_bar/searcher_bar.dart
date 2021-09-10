@@ -95,7 +95,7 @@ class _SearcherBarState extends State<SearcherBar> {
                                             CrossAxisAlignment.center,
                                         children: [
                                           Expanded(
-                                            child: ShiftRightFixer(
+                                            child: SearcherBarKeyboardListener(
                                               child: BlocListener<SearcherBloc,
                                                   SearcherState>(
                                                 bloc: state.searcherBloc,
@@ -168,16 +168,18 @@ class _SearcherBarState extends State<SearcherBar> {
 
 // Code from:
 // https://github.com/flutter/flutter/issues/75675#issuecomment-831581709.
-class ShiftRightFixer extends StatefulWidget {
-  ShiftRightFixer({Key? key, required this.child}) : super(key: key);
+class SearcherBarKeyboardListener extends StatefulWidget {
+  SearcherBarKeyboardListener({Key? key, required this.child})
+      : super(key: key);
 
   final Widget child;
 
   @override
-  State<StatefulWidget> createState() => _ShiftRightFixerState();
+  State<StatefulWidget> createState() => _SearcherBarKeyboardListenerState();
 }
 
-class _ShiftRightFixerState extends State<ShiftRightFixer> {
+class _SearcherBarKeyboardListenerState
+    extends State<SearcherBarKeyboardListener> {
   final FocusNode focus =
       FocusNode(skipTraversal: true, canRequestFocus: false);
 
@@ -193,7 +195,13 @@ class _ShiftRightFixerState extends State<ShiftRightFixer> {
       focusNode: focus,
       onKey: (_, RawKeyEvent event) {
         if (event is RawKeyDownEvent) {
-          if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+          if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+            if (Provider.of<SearcherAppState>(context, listen: false)
+                .searcherBloc
+                .state is SearcherSuggestionsDone) {
+              focus.nextFocus();
+            }
+          } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
             if (event.isAltPressed) {
               Provider.of<SearcherAppState>(context, listen: false)
                   .previewBloc
