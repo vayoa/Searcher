@@ -37,23 +37,19 @@ class SearcherButtons extends StatelessWidget {
 }
 
 class SearcherButton extends StatelessWidget {
-  SearcherButton({
+  const SearcherButton({
     Key? key,
     required this.icon,
     required this.onPressed,
   }) : super();
   final IconData icon;
   final void Function() onPressed;
-  final FocusNode focusNode = FocusNode(
-    canRequestFocus: false,
-    skipTraversal: true,
-  );
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: IconButton(
-        focusNode: focusNode,
+        focusNode: FocusNode(canRequestFocus: false, skipTraversal: true),
         iconSize: 20.0,
         splashRadius: 20.0,
         icon: Icon(
