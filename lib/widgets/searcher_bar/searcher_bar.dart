@@ -192,20 +192,19 @@ class _ShiftRightFixerState extends State<ShiftRightFixer> {
     return Focus(
       focusNode: focus,
       onKey: (_, RawKeyEvent event) {
-        // FIXME: This gets triggered multiple times if we hold the keys.
-        if (event.physicalKey == PhysicalKeyboardKey.numpad4 ||
-            event.physicalKey == PhysicalKeyboardKey.arrowLeft) {
-          if (event.isAltPressed) {
-            Provider.of<SearcherAppState>(context, listen: false)
-                .previewBloc
-                .add(PreviousPreview());
-          }
-        } else if (event.physicalKey == PhysicalKeyboardKey.numpad6 ||
-            event.physicalKey == PhysicalKeyboardKey.arrowRight) {
-          if (event.isAltPressed) {
-            Provider.of<SearcherAppState>(context, listen: false)
-                .previewBloc
-                .add(NextPreview());
+        if (event is RawKeyDownEvent) {
+          if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+            if (event.isAltPressed) {
+              Provider.of<SearcherAppState>(context, listen: false)
+                  .previewBloc
+                  .add(PreviousPreview());
+            }
+          } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+            if (event.isAltPressed) {
+              Provider.of<SearcherAppState>(context, listen: false)
+                  .previewBloc
+                  .add(NextPreview());
+            }
           }
         }
         return event.physicalKey == PhysicalKeyboardKey.shiftRight
