@@ -205,6 +205,12 @@ class _ShiftRightFixerState extends State<ShiftRightFixer> {
                   .previewBloc
                   .add(NextPreview());
             }
+          } else if (event.logicalKey == LogicalKeyboardKey.keyQ) {
+            if (event.isAltPressed) {
+              Provider.of<SearcherAppState>(context, listen: false)
+                  .previewBloc
+                  .add(CloseCurrentPreview());
+            }
           }
         }
         return event.physicalKey == PhysicalKeyboardKey.shiftRight
