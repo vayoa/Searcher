@@ -51,7 +51,7 @@ abstract class SearcherPreview extends SearcherPreviewState {
   }
 }
 
-class SearcherPreviewInitial extends AutocompletePreview {}
+class SearcherPreviewInitial extends SettingsPreview {}
 
 class AutocompletePreview extends SearcherPreview {
   AutocompletePreview()

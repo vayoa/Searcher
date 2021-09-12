@@ -1,6 +1,5 @@
 class SearcherGroup {
   final String title;
-
   late final List<String> websites = [];
 
   SearcherGroup({required this.title, required List<String> websites}) {
