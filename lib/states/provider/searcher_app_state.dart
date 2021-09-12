@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:process_run/shell.dart';
 import 'package:searcher_app/modals/searcher_commands.dart';
+import 'package:searcher_app/modals/searcher_group.dart';
 import 'package:searcher_app/states/blocs/searcher_bloc/searcher_bloc.dart';
 import 'package:searcher_app/states/blocs/searcher_preview_bloc/searcher_preview_bloc.dart';
 
@@ -9,6 +10,16 @@ class SearcherAppState extends ChangeNotifier {
   SearcherMode _mode = SearcherMode.search;
   late SearcherBloc _searcherBloc;
   SearcherPreviewBloc _previewBloc = SearcherPreviewBloc();
+  final List<SearcherGroup> _searcherGroups = [
+    SearcherGroup(
+      title: 'Programming',
+      websites: const [
+        'www.stackoverflow.com/',
+        'https://www.codegrepper.com',
+      ],
+    )
+  ];
+  int _currentSearcherGroup = 0;
 
   SearcherAppState() {
     _searcherBloc = SearcherBloc(this);
@@ -19,6 +30,10 @@ class SearcherAppState extends ChangeNotifier {
   SearcherPreviewBloc get previewBloc => _previewBloc;
 
   SearcherMode get currentSearcherMode => this._mode;
+
+  List<SearcherGroup> get searcherGroups => _searcherGroups;
+
+  int get currentSearcherGroup => _currentSearcherGroup;
 
   set currentSearcherMode(SearcherMode newMode) {
     if (newMode != _mode) {
@@ -80,7 +95,7 @@ class SearcherAppState extends ChangeNotifier {
   Future<void> runInCurrentMode(String text) async {
     switch (currentSearcherMode) {
       case SearcherMode.search:
-        await search(text);
+        await currentSearcherGroupSearch(text);
         return;
       case SearcherMode.searcherCommand:
         runCommand(text);
@@ -97,7 +112,7 @@ class SearcherAppState extends ChangeNotifier {
     shell.kill();
   }
 
-  Future<void> search(String query, {List<String> websites = const []}) async {
+  Future<void> search(String query, {SearcherGroup? searcherGroup}) async {
     var shell = Shell();
     String process = 'start chrome ';
     if (_incognito) {
@@ -105,12 +120,14 @@ class SearcherAppState extends ChangeNotifier {
     } else {
       process += '"? ';
     }
-    websites.asMap().forEach((key, value) {
-      process += 'site:$value ';
-      if (key != websites.length - 1) {
-        process += 'OR ';
-      }
-    });
+    if (searcherGroup != null) {
+      searcherGroup.websites.asMap().forEach((key, value) {
+        process += 'site:$value ';
+        if (key != searcherGroup.websites.length - 1) {
+          process += 'OR ';
+        }
+      });
+    }
     process += '$query"';
     await shell.run(process);
     shell.kill();
@@ -118,6 +135,14 @@ class SearcherAppState extends ChangeNotifier {
 
   runCommand(String command) {
     SearcherCommands.all[command]!.command.call(this);
+  }
+
+  Future<void> currentSearcherGroupSearch(String query) async {
+    SearcherGroup? _searcherGroup;
+    if (_searcherGroups.isNotEmpty &&
+        _currentSearcherGroup < _searcherGroups.length)
+      _searcherGroup = _searcherGroups[_currentSearcherGroup];
+    await search(query, searcherGroup: _searcherGroup);
   }
 }
 

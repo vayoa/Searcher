@@ -29,12 +29,14 @@ class SearcherCommands {
         appState.previewBloc.add(OpenPreview(preview: NotesPreview()));
       },
     ),
-    'expand': SearcherCommand(
-      name: 'expand',
-      description: 'Display all of your saved notes.',
+    'settings': SearcherCommand(
+      name: 'settings',
+      description: 'Set and view current app settings.',
       type: SearcherCommandType.action,
-      iconData: Icons.aspect_ratio_rounded,
-      command: (_) {},
+      iconData: Icons.settings_applications_rounded,
+      command: (appState) {
+        appState.previewBloc.add(OpenPreview(preview: SettingsPreview()));
+      },
     ),
     'dummy': SearcherCommand(
       name: 'dummy',
@@ -43,6 +45,13 @@ class SearcherCommands {
       command: (appState) {
         appState.previewBloc.add(OpenPreview(preview: DummyPreview()));
       },
+    ),
+    'expand': SearcherCommand(
+      name: 'expand',
+      description: 'Display all of your saved notes.',
+      type: SearcherCommandType.action,
+      iconData: Icons.aspect_ratio_rounded,
+      command: (_) {},
     ),
     'next': SearcherCommand(
       name: 'next',

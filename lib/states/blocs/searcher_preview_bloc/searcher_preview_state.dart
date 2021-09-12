@@ -62,6 +62,11 @@ class NotesPreview extends SearcherPreview {
   NotesPreview() : super(title: 'Notes', preview: const SearcherNotesPreview());
 }
 
+class SettingsPreview extends SearcherPreview {
+  SettingsPreview()
+      : super(title: 'Settings', preview: const SearcherSettingsPreview());
+}
+
 class DummyPreview extends SearcherPreview {
   static final Random rnd = new Random();
   static int dummyPreviewCount = 0;
@@ -85,7 +90,6 @@ class DummyPreview extends SearcherPreview {
 
   @override
   int get instanceID => _instanceID;
-
 }
 
 class UpdatingPreview extends PreviewStateNotifier {

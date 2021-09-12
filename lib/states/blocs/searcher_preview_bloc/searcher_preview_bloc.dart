@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:math';
+
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:searcher_app/widgets/searcher_bar_preview/local_widgets/searcher_bar_autocomplete.dart';
 import 'package:searcher_app/widgets/searcher_bar_preview/local_widgets/searcher_notes_preview.dart';
+import 'package:searcher_app/widgets/searcher_bar_preview/local_widgets/searcher_settings_preview.dart';
 
 part 'searcher_preview_event.dart';
-
 part 'searcher_preview_state.dart';
 
 class SearcherPreviewBloc
