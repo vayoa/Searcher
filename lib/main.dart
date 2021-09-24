@@ -1,6 +1,6 @@
-import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:provider/provider.dart';
 import 'package:searcher_app/states/provider/searcher_app_state.dart';
 import 'package:searcher_app/widgets/searcher_bar/searcher_bar.dart';
@@ -13,7 +13,7 @@ void main() {
   runApp(MyApp());
 
   doWhenWindowReady(() {
-    final windowSize = Size(1000, 260);
+    final windowSize = Size(1000, 300);
     appWindow.minSize = windowSize;
     appWindow.size = windowSize;
     appWindow.alignment = Alignment.center;
@@ -55,8 +55,32 @@ class _MyAppState extends State<MyApp> {
               body: Stack(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(top: 26.0),
-                    child: SearcherBar(),
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: Stack(
+                      children: [
+                        /*TODO: Make the gradient visible only when the
+                           autocomplete preview is active and previews are
+                           shown.*/
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 500),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: const [
+                                Colors.transparent,
+                                Colors.black54,
+                                Colors.black45,
+                                Colors.transparent,
+                              ],
+                              stops: [0.0, 0.15, 0.8, 1.0],
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6.0),
+                          child: SearcherBar(),
+                        ),
+                      ],
+                    ),
                   ),
                   AppTitleBar()
                 ],
