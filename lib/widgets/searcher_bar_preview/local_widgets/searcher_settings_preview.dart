@@ -20,7 +20,7 @@ class SearcherSettingsPreview extends StatelessWidget {
   }
 }
 
-class SearcherGroupEditor extends StatelessWidget {
+class SearcherGroupEditor extends StatefulWidget {
   const SearcherGroupEditor({
     Key? key,
     required this.searcherGroup,
@@ -28,6 +28,11 @@ class SearcherGroupEditor extends StatelessWidget {
 
   final SearcherGroup searcherGroup;
 
+  @override
+  _SearcherGroupEditorState createState() => _SearcherGroupEditorState();
+}
+
+class _SearcherGroupEditorState extends State<SearcherGroupEditor> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -40,7 +45,7 @@ class SearcherGroupEditor extends StatelessWidget {
             SizedBox(
               width: 150,
               child: Text(
-                searcherGroup.title,
+                widget.searcherGroup.title,
                 style: TextStyle(color: Colors.grey[300]),
               ),
             ),
@@ -49,11 +54,11 @@ class SearcherGroupEditor extends StatelessWidget {
               width: 500,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: searcherGroup.websites.length,
+                itemCount: widget.searcherGroup.websites.length,
                 itemBuilder: (context, index) => Padding(
                   padding: EdgeInsets.only(right: 8.0),
                   child: Chip(
-                    label: Text(searcherGroup.websites[index]),
+                    label: Text(widget.searcherGroup.websites[index]),
                   ),
                 ),
               ),
@@ -62,7 +67,22 @@ class SearcherGroupEditor extends StatelessWidget {
               icon: Icon(Icons.add_rounded),
               splashRadius: 18.0,
               color: Colors.white.withOpacity(0.4),
-              onPressed: () {},
+              onPressed: () async {
+                final TextEditingController _textEditingController =
+                    new TextEditingController();
+                final String? newWebsite = await showDialog<String>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Add a website to the Searcher Group'),
+                    backgroundColor: Colors.grey[800]!.withOpacity(0.9),
+                    content: TextField(
+                      controller: _textEditingController,
+                      onSubmitted: (value) => Navigator.of(context).pop(value),
+                      decoration: InputDecoration(hintText: "Website Domain"),
+                    ),
+                  ),
+                );
+              },
             ),
             VerticalDivider(indent: 10.0, endIndent: 10.0),
           ],
